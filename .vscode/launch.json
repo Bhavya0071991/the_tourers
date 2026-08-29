@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "dummy_epod",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart",
+            "toolArgs": [
+                "--dart-define=SUPABASE_URL=https://urukjhknsjupknviuxgn.supabase.co",
+                "--dart-define=SUPABASE_ANON_KEY=sb_publishable_bANydNxGW1OerFUgSJvxgg_ReeYL9Gl"
+            ]
+        }
+    ]
+}

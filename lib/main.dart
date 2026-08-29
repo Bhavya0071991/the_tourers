@@ -11,13 +11,33 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   usePathUrlStrategy();
 
-  // Load environment variables
-  await dotenv.load(fileName: ".env");
+  // Load environment variables safely
+  try {
+    await dotenv.load(fileName: ".env");
+  } catch (_) {
+    // Graceful fallback when .env is not bundled in web production
+  }
+
+  final supabaseUrl = dotenv.env['SUPABASE_URL'] ??
+      const String.fromEnvironment(
+        'SUPABASE_URL',
+        defaultValue: 'https://urukjhknsjupknviuxgn.supabase.co',
+      );
+
+  final supabaseAnonKey = dotenv.env['SUPABASE_ANON_KEY'] ??
+      const String.fromEnvironment(
+        'SUPABASE_ANON_KEY',
+        defaultValue: 'sb_publishable_bANydNxGW1OerFUgSJvxgg_ReeYL9Gl',
+      );
 
   // Initialize Supabase
   await Supabase.initialize(
-    url: dotenv.env['SUPABASE_URL'] ?? '',
-    publishableKey: dotenv.env['SUPABASE_ANON_KEY'] ?? '',
+    url: supabaseUrl.isNotEmpty
+        ? supabaseUrl
+        : 'https://urukjhknsjupknviuxgn.supabase.co',
+    publishableKey: supabaseAnonKey.isNotEmpty
+        ? supabaseAnonKey
+        : 'sb_publishable_bANydNxGW1OerFUgSJvxgg_ReeYL9Gl',
   );
 
   runApp(const ProviderScope(child: MyApp()));
