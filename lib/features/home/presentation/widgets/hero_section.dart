@@ -304,7 +304,40 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                         ),
               ),
 
-              // 4. Animated "Scroll Down" Indicator
+              // 4. Navigation Arrows (Tablet/Desktop)
+              if (screenSize.width >= 768 && banners.length > 1) ...[
+                Positioned(
+                  left: 24,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: _buildNavButton(
+                      icon: Icons.arrow_back_ios_new,
+                      onPressed: () {
+                        final prevIndex =
+                            currentPage == 0 ? banners.length - 1 : currentPage - 1;
+                        ref.read(heroViewModelProvider.notifier).setPage(prevIndex);
+                      },
+                    ),
+                  ),
+                ),
+                Positioned(
+                  right: 24,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: _buildNavButton(
+                      icon: Icons.arrow_forward_ios,
+                      onPressed: () {
+                        final nextIndex = (currentPage + 1) % banners.length;
+                        ref.read(heroViewModelProvider.notifier).setPage(nextIndex);
+                      },
+                    ),
+                  ),
+                ),
+              ],
+
+              // 5. Animated "Scroll Down" Indicator
               if (isDesktop)
                 Positioned(
                   bottom: 32,
@@ -376,6 +409,29 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
         loading: () =>
             const Center(child: CircularProgressIndicator(color: Colors.white)),
         error: (e, st) => const Center(child: Text('Failed to load banners')),
+      ),
+    );
+  }
+
+  Widget _buildNavButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.black.withValues(alpha: 0.2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+          width: 1,
+        ),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: 24),
+        hoverColor: Colors.white.withValues(alpha: 0.1),
+        splashRadius: 24,
+        padding: const EdgeInsets.all(12),
       ),
     );
   }
