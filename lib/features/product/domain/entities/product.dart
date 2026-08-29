@@ -16,6 +16,19 @@ class Product extends Equatable {
     return jsonEncode(map);
   }
 
+  static Map<String, String> _decodeColorDesignImages(String jsonStr) {
+    try {
+      final Map<String, dynamic> decoded = jsonDecode(jsonStr);
+      return decoded.map((k, v) => MapEntry(k, v.toString()));
+    } catch (e) {
+      return {};
+    }
+  }
+
+  static String _encodeColorDesignImages(Map<String, String> map) {
+    return jsonEncode(map);
+  }
+
   final String id;
   final String name;
   final String price;
@@ -24,8 +37,8 @@ class Product extends Equatable {
   final String? image; // Primary image for backwards compatibility
   final List<String> images; // Gallery images
   final Map<String, List<String>> colorImages; // Images per color variant
+  final Map<String, String> colorDesignImages; // Transparent PNG per color variant
   final String? mockup;
-  final String? designImage; // Transparent PNG for Qikink
   final String? tag;
   final String gender; // 'mens', 'womens', 'unisex'
   final String category; // 'design', 'quotes', 'anime', etc.
@@ -40,8 +53,8 @@ class Product extends Equatable {
     this.image,
     this.images = const [],
     this.colorImages = const {},
+    this.colorDesignImages = const {},
     this.mockup,
-    this.designImage,
     this.tag,
     required this.gender,
     required this.category,
@@ -67,8 +80,8 @@ class Product extends Equatable {
       image: map['image'],
       images: parsedImages,
       colorImages: map['colorImages'] != null ? _decodeColorImages(map['colorImages']!) : const {},
+      colorDesignImages: map['colorDesignImages'] != null ? _decodeColorDesignImages(map['colorDesignImages']!) : const {},
       mockup: map['mockup'],
-      designImage: map['designImage'],
       tag: map['tag'],
       gender: map['gender'] ?? 'mens',
       category: map['category'] ?? 'design',
@@ -95,6 +108,20 @@ class Product extends Equatable {
       });
     }
 
+    Map<String, String> parsedColorDesignImages = {};
+    if (json['color_design_images'] != null && json['color_design_images'] is Map) {
+      final map = json['color_design_images'] as Map;
+      map.forEach((key, value) {
+        parsedColorDesignImages[key.toString()] = value.toString();
+      });
+    } else if (json['design_image'] != null || json['designImage'] != null) {
+      // Backwards compatibility for old single design image
+      final String oldDesign = json['design_image']?.toString() ?? json['designImage']?.toString() ?? '';
+      if (oldDesign.isNotEmpty) {
+        parsedColorDesignImages['Black'] = oldDesign; 
+      }
+    }
+
     return Product(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'UNKNOWN PRODUCT',
@@ -104,8 +131,8 @@ class Product extends Equatable {
       image: json['image']?.toString(),
       images: parsedImages,
       colorImages: parsedColorImages,
+      colorDesignImages: parsedColorDesignImages,
       mockup: json['mockup']?.toString(),
-      designImage: json['design_image']?.toString() ?? json['designImage']?.toString(),
       tag: json['tag']?.toString(),
       gender: json['gender']?.toString() ?? 'mens',
       category: json['category']?.toString() ?? 'design',
@@ -127,8 +154,8 @@ class Product extends Equatable {
       if (image != null) 'image': image!,
       if (images.isNotEmpty) 'images': images.join('||'),
       if (colorImages.isNotEmpty) 'colorImages': _encodeColorImages(colorImages),
+      if (colorDesignImages.isNotEmpty) 'colorDesignImages': _encodeColorDesignImages(colorDesignImages),
       if (mockup != null) 'mockup': mockup!,
-      if (designImage != null) 'designImage': designImage!,
       if (tag != null) 'tag': tag!,
       'isFavorite': isFavorite.toString(),
     };
@@ -144,8 +171,8 @@ class Product extends Equatable {
         image,
         images,
         colorImages,
+        colorDesignImages,
         mockup,
-        designImage,
         tag,
         gender,
         category,

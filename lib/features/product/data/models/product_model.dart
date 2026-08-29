@@ -11,8 +11,8 @@ class ProductModel extends Product {
     super.image,
     super.images = const [],
     super.colorImages = const {},
+    super.colorDesignImages = const {},
     super.mockup,
-    super.designImage,
     super.tag,
     required super.gender,
     required super.category,
@@ -47,6 +47,28 @@ class ProductModel extends Product {
       }
     }
 
+    Map<String, String> parsedColorDesignImages = {};
+    if (json['color_design_images'] != null) {
+      Map? map;
+      if (json['color_design_images'] is String) {
+        try {
+          map = jsonDecode(json['color_design_images']) as Map?;
+        } catch (e) {}
+      } else if (json['color_design_images'] is Map) {
+        map = json['color_design_images'] as Map;
+      }
+      if (map != null) {
+        map.forEach((key, value) {
+          parsedColorDesignImages[key.toString()] = value.toString();
+        });
+      }
+    } else if (json['design_image'] != null) {
+      final oldDesign = json['design_image'].toString();
+      if (oldDesign.isNotEmpty) {
+         parsedColorDesignImages['Black'] = oldDesign;
+      }
+    }
+
     // Format price if it comes as a number from DB, or if it's already a string
     String formattedPrice = json['price']?.toString() ?? '0';
     if (!formattedPrice.startsWith('₹')) {
@@ -70,8 +92,8 @@ class ProductModel extends Product {
       image: json['image'] as String?,
       images: parsedImages,
       colorImages: parsedColorImages,
+      colorDesignImages: parsedColorDesignImages,
       mockup: json['mockup'] as String?,
-      designImage: json['design_image'] as String?,
       tag: json['tag'] as String?,
       gender: json['gender'] as String,
       category: json['category'] as String,
@@ -97,8 +119,8 @@ class ProductModel extends Product {
       'image': image,
       'images': images,
       'color_images': colorImages,
+      'color_design_images': colorDesignImages,
       'mockup': mockup,
-      'design_image': designImage,
       'tag': tag,
       'gender': gender,
       'category': category,

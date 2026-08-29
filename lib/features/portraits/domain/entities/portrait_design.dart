@@ -44,7 +44,7 @@ class PortraitDesign extends Equatable {
       image: imageUrl,
       images: [imageUrl],
       mockup: imageUrl,
-      designImage: designUrl,
+      colorDesignImages: {'Black': designUrl},
       gender: 'unisex',
       category: 'portraits',
       tag: category.toUpperCase(),

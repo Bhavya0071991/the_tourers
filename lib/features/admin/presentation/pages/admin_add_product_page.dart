@@ -37,7 +37,6 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
   String _selectedCategory = 'design';
 
   final List<_ColorVariantData> _colorVariants = [];
-  _ImageData? _designImage;
   final ImagePicker _picker = ImagePicker();
 
   bool _isLoading = false;
@@ -66,15 +65,21 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
 
               if (product.colorImages.isNotEmpty) {
                 product.colorImages.forEach((color, urls) {
-                  _colorVariants.add(_ColorVariantData(color, urls.map((url) => _ImageData(url: url)).toList()));
+                  final designUrl = product.colorDesignImages[color];
+                  _colorVariants.add(
+                    _ColorVariantData(
+                      color, 
+                      urls.map((url) => _ImageData(url: url)).toList(),
+                      designImage: designUrl != null ? _ImageData(url: designUrl) : null,
+                    )
+                  );
                 });
               } else if (product.images.isNotEmpty) {
-                _colorVariants.add(_ColorVariantData('Black', product.images.map((url) => _ImageData(url: url)).toList()));
+                final designUrl = product.colorDesignImages['Black'];
+                _colorVariants.add(_ColorVariantData('Black', product.images.map((url) => _ImageData(url: url)).toList(), designImage: designUrl != null ? _ImageData(url: designUrl) : null,));
               } else if (product.image != null) {
-                _colorVariants.add(_ColorVariantData('Black', [_ImageData(url: product.image!)]));
-              }
-              if (product.designImage != null) {
-                _designImage = _ImageData(url: product.designImage!);
+                final designUrl = product.colorDesignImages['Black'];
+                _colorVariants.add(_ColorVariantData('Black', [_ImageData(url: product.image!)], designImage: designUrl != null ? _ImageData(url: designUrl) : null,));
               }
             });
           }
@@ -149,7 +154,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
     }
   }
 
-  Future<void> _pickDesignImage() async {
+  Future<void> _pickDesignImage(int variantIndex) async {
     try {
       final XFile? selectedImage = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -159,7 +164,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
       if (selectedImage != null) {
         final bytes = await selectedImage.readAsBytes();
         setState(() {
-          _designImage = _ImageData(
+          _colorVariants[variantIndex].designImage = _ImageData(
             bytes: bytes,
             extension: selectedImage.name.split('.').last,
           );
@@ -189,17 +194,16 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
     });
   }
 
-
-  void _removeDesignImage() {
+  void _removeDesignImage(int variantIndex) {
     setState(() {
-      _designImage = null;
+      _colorVariants[variantIndex].designImage = null;
     });
   }
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      if (_colorVariants.isEmpty || _colorVariants.any((v) => v.images.length < 2)) {
-        AppSnackBar.show(context, 'Please add at least one color variant and upload at least 2 images for each.');
+      if (_colorVariants.isEmpty || _colorVariants.any((v) => v.images.length < 2 || v.designImage == null)) {
+        AppSnackBar.show(context, 'Please add at least one color variant. Each must have at least 2 gallery images and 1 transparent design image.');
         return;
       }
 
@@ -209,6 +213,8 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
 
       try {
         Map<String, List<String>> uploadedColorImages = {};
+        Map<String, String> uploadedColorDesignImages = {};
+        
         for (var variant in _colorVariants) {
           List<String> variantUrls = [];
           for (var img in variant.images) {
@@ -224,23 +230,21 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
             }
           }
           uploadedColorImages[variant.name] = variantUrls;
-        }
-        List<String> uploadedUrls = uploadedColorImages.values.first; // Fallback for 'images'
 
-
-        String? designUrl;
-        if (_designImage != null) {
-          if (_designImage!.isNetwork) {
-            designUrl = _designImage!.url;
-          } else if (_designImage!.bytes != null) {
-            final ext = _designImage!.extension ?? 'png';
-            final fileName = 'designs/${const Uuid().v4()}.$ext';
-
-            designUrl = await ref
-                .read(storageRepositoryProvider)
-                .uploadBinary('qikink-designs', fileName, _designImage!.bytes!);
+          if (variant.designImage != null) {
+            if (variant.designImage!.isNetwork) {
+              uploadedColorDesignImages[variant.name] = variant.designImage!.url!;
+            } else if (variant.designImage!.bytes != null) {
+              final ext = variant.designImage!.extension ?? 'png';
+              final fileName = 'designs/${const Uuid().v4()}.$ext';
+              final publicUrl = await ref
+                  .read(storageRepositoryProvider)
+                  .uploadBinary('qikink-designs', fileName, variant.designImage!.bytes!);
+              uploadedColorDesignImages[variant.name] = publicUrl;
+            }
           }
         }
+        List<String> uploadedUrls = uploadedColorImages.values.first; // Fallback for 'images'
 
         final product = Product(
           id: isEditing ? widget.productId! : '',
@@ -253,7 +257,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
           image: uploadedUrls.first,
           images: uploadedUrls,
           colorImages: uploadedColorImages,
-          designImage: designUrl,
+          colorDesignImages: uploadedColorDesignImages,
           tag: _tagController.text.trim(),
           gender: _selectedGender,
           category: _selectedCategory,
@@ -639,98 +643,52 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                               );
                             },
                           ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            AppText.spaceMono('Transparent Design PNG', fontSize: 12, color: textColor),
+                            TextButton.icon(
+                              onPressed: () => _pickDesignImage(variantIndex),
+                              icon: Icon(Icons.upload, size: 16, color: textColor),
+                              label: AppText.spaceMono('UPLOAD', fontSize: 12, color: textColor),
+                            )
+                          ],
+                        ),
+                        if (variant.designImage != null) ...[
+                          const SizedBox(height: 8),
+                          Stack(
+                            children: [
+                              Container(
+                                height: 120,
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: textColor, width: 2),
+                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                ),
+                                child: variant.designImage!.isNetwork
+                                    ? AppImage(imageUrl: variant.designImage!.url!, fit: BoxFit.contain)
+                                    : Image.memory(variant.designImage!.bytes!, fit: BoxFit.contain),
+                              ),
+                              Positioned(
+                                top: 2,
+                                right: 2,
+                                child: InkWell(
+                                  onTap: () => _removeDesignImage(variantIndex),
+                                  child: Container(
+                                    color: textColor,
+                                    padding: const EdgeInsets.all(2),
+                                    child: Icon(Icons.close, color: surfaceColor, size: 12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ],
                     ),
                   );
                 }),
-                const SizedBox(height: 24),
-
-                // Design Image Picker Section
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildLabel('TRANSPARENT DESIGN (PNG)', textColor),
-                        AppText.spaceMono(
-                          'Upload the raw design file for Qikink printing.',
-                          fontSize: 12,
-                          color: textColor.withValues(alpha: 0.6),
-                        ),
-                      ],
-                    ),
-                    BrutalistHoverWidget(
-                      shadowColor: textColor.withValues(alpha: 0.2),
-                      offset: const Offset(2, 2),
-                      child: ElevatedButton.icon(
-                        onPressed: _pickDesignImage,
-                        icon: Icon(Icons.upload_file, color: surfaceColor),
-                        label: AppText.spaceMono(
-                          _designImage != null
-                              ? 'CHANGE DESIGN'
-                              : 'UPLOAD DESIGN',
-                          color: surfaceColor,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: textColor,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 16,
-                          ),
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.zero,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                if (_designImage != null)
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      border: Border.all(color: textColor, width: 2),
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.surfaceContainerHighest,
-                    ),
-                    child: Stack(
-                      children: [
-                        Center(
-                          child: _designImage!.isNetwork
-                              ? AppImage(
-                                  imageUrl: _designImage!.url!,
-                                  fit: BoxFit.contain,
-                                )
-                              : Image.memory(
-                                  _designImage!.bytes!,
-                                  fit: BoxFit.contain,
-                                ),
-                        ),
-                        Positioned(
-                          top: 4,
-                          right: 4,
-                          child: InkWell(
-                            onTap: _removeDesignImage,
-                            child: Container(
-                              color: textColor,
-                              padding: const EdgeInsets.all(4),
-                              child: Icon(
-                                Icons.close,
-                                color: surfaceColor,
-                                size: 16,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 const SizedBox(height: 24),
 
                 _buildLabel('DESCRIPTION', textColor),
@@ -886,7 +844,8 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
 class _ColorVariantData {
   String name;
   List<_ImageData> images;
-  _ColorVariantData(this.name, this.images);
+  _ImageData? designImage;
+  _ColorVariantData(this.name, this.images, {this.designImage});
 }
 
 class _ImageData {
