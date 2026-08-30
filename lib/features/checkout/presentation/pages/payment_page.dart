@@ -151,7 +151,8 @@ class _PaymentPageState extends ConsumerState<PaymentPage>
         context.go(AppPaths.orderSuccess);
       } else {
         final user = ref.read(authProvider).value;
-        final razorpayKeyId = dotenv.env['RAZORPAY_KEY'] ?? '';
+        final razorpayKeyId = dotenv.env['RAZORPAY_KEY'] ??
+            const String.fromEnvironment('RAZORPAY_KEY', defaultValue: '');
 
         var options = {
           'key': razorpayKeyId,
@@ -275,7 +276,8 @@ class _PaymentPageState extends ConsumerState<PaymentPage>
                           icon: Icons.security,
                           isSelected: _selectedMethod == 'Pay Online',
                           isRecommended: true,
-                          onTap: () => setState(() => _selectedMethod = 'Pay Online'),
+                          onTap: () =>
+                              setState(() => _selectedMethod = 'Pay Online'),
                         ),
                         PaymentMethodCard(
                           title: 'CASH ON DELIVERY',
