@@ -231,7 +231,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
         height ??
         (isDesktop
             ? MediaQuery.of(context).size.height - kToolbarHeight
-            : 500.0);
+            : 380.0);
 
     // 1. The base content (images/videos)
     Widget contentLayer = PageView.builder(
@@ -278,10 +278,40 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             mockupAsset = media['url'];
           }
         }
-        return MockupImageWidget(
-          image: media['url']!,
-          mockup: mockupAsset,
-          fit: BoxFit.cover,
+        return GestureDetector(
+          onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => Dialog(
+                backgroundColor: Colors.transparent,
+                insetPadding: const EdgeInsets.all(16),
+                child: Stack(
+                  alignment: Alignment.topRight,
+                  children: [
+                    InteractiveViewer(
+                      panEnabled: true,
+                      minScale: 1.0,
+                      maxScale: 4.0,
+                      child: MockupImageWidget(
+                        image: media['url']!,
+                        mockup: mockupAsset,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                      onPressed: () => Navigator.of(context).pop(),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          child: MockupImageWidget(
+            image: media['url']!,
+            mockup: mockupAsset,
+            fit: BoxFit.cover,
+          ),
         );
       },
     );
@@ -347,89 +377,152 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
     }
 
     // 4. Combine with navigation controls
-    return Container(
+    final mainSlider = Container(
       height: containerHeight,
       width: double.infinity,
       color: context.colorScheme.surfaceContainerHighest,
       child: Stack(
         children: [
           Positioned.fill(child: contentLayer),
-          Positioned(
-            bottom: 100,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(
-                mediaList.length,
-                (index) => Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 4),
-                  width: state.currentMediaIndex == index ? 24 : 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: state.currentMediaIndex == index
-                        ? AppTheme.neonAccent
-                        : context.colorScheme.onSurface.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(4),
+          if (isDesktop)
+            Positioned(
+              bottom: 100,
+              left: 0,
+              right: 0,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  mediaList.length,
+                  (index) => Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                    width: state.currentMediaIndex == index ? 24 : 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: state.currentMediaIndex == index
+                          ? AppTheme.neonAccent
+                          : context.colorScheme.onSurface.withValues(alpha: 0.3),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
           if (state.currentMediaIndex > 0)
-            Positioned(
-              left: 16,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.white,
+              Positioned(
+                left: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      shape: BoxShape.circle,
                     ),
-                    onPressed: () {
-                      _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-          if (state.currentMediaIndex < mediaList.length - 1)
-            Positioned(
-              right: 16,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.white,
+            if (state.currentMediaIndex < mediaList.length - 1)
+              Positioned(
+                right: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      shape: BoxShape.circle,
                     ),
-                    onPressed: () {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
         ],
       ),
+    );
+
+    if (isDesktop) return mainSlider;
+
+    // Mobile UI: Main slider + thumbnails below
+    return Column(
+      children: [
+        mainSlider,
+        if (mediaList.length > 1)
+          Container(
+            height: 90,
+            padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: mediaList.length,
+              itemBuilder: (context, index) {
+                final media = mediaList[index];
+                final isSelected = state.currentMediaIndex == index;
+                
+                String? mockupAsset;
+                if (index == 0 && product.mockup != null) {
+                  if (state.availableColors.containsKey(state.selectedColor) &&
+                      state.availableColors[state.selectedColor]!.isNotEmpty) {
+                    mockupAsset = state.availableColors[state.selectedColor]!.first;
+                  } else {
+                    mockupAsset = media['url'];
+                  }
+                }
+                
+                return GestureDetector(
+                  onTap: () {
+                    _pageController.animateToPage(
+                      index,
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOut,
+                    );
+                  },
+                  child: Container(
+                    width: 66,
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: isSelected ? AppTheme.neonAccent : Colors.transparent,
+                        width: 2,
+                      ),
+                      color: context.colorScheme.surfaceContainerHighest,
+                    ),
+                    child: media['type'] == 'video'
+                        ? const Center(
+                            child: Icon(Icons.play_circle_outline, color: Colors.black54),
+                          )
+                        : MockupImageWidget(
+                            image: media['url']!,
+                            mockup: mockupAsset,
+                            fit: BoxFit.cover,
+                          ),
+                  ),
+                );
+              },
+            ),
+          ),
+      ],
     );
   }
 
@@ -464,7 +557,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                 );
 
                 return IconButton(
-                  iconSize: 40,
+                  iconSize: isDesktop ? 40 : 28,
                   icon: Icon(
                     isWishlisted ? Icons.favorite : Icons.favorite_border,
                     color: isWishlisted

@@ -98,8 +98,8 @@ class _CartPageState extends ConsumerState<CartPage> {
                 children: [
                   WebConstrainedBox(
                     padding: EdgeInsets.symmetric(
-                      horizontal: isDesktop ? 64.0 : 24.0,
-                      vertical: 48.0,
+                      horizontal: isDesktop ? 64.0 : 16.0,
+                      vertical: isDesktop ? 48.0 : 32.0,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,7 +107,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                         // Giant Header
                         AppText.bebas(
                           'YOUR SHOPPING BAG',
-                          fontSize: isDesktop ? 80 : 48,
+                          fontSize: isDesktop ? 80 : 42,
                           height: 0.9,
                           letterSpacing: 2.0,
                           color: textColor,
@@ -307,8 +307,8 @@ class _CartPageState extends ConsumerState<CartPage> {
             children: [
               // Product Image Column
               Container(
-                width: 140,
-                height: 160,
+                width: isDesktop ? 140 : 100,
+                height: isDesktop ? 160 : 130,
                 decoration: BoxDecoration(
                   border: Border(
                     right: BorderSide(color: textColor, width: 3.0),
@@ -355,7 +355,7 @@ class _CartPageState extends ConsumerState<CartPage> {
               // Product Info Column
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(isDesktop ? 16.0 : 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -433,14 +433,17 @@ class _CartPageState extends ConsumerState<CartPage> {
                       ],
 
                       // Price & Quantity control
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      Wrap(
+                        alignment: WrapAlignment.spaceBetween,
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        runSpacing: 8.0,
                         children: [
                           AppText.spaceMono(
                             product['price'] ?? '',
                             fontSize: isDesktop ? 16 : 14,
                             fontWeight: FontWeight.bold,
                           ),
+                          const SizedBox(width: 8),
 
                           // Quantity buttons
                           Row(
