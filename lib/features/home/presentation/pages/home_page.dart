@@ -62,12 +62,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                         child: Column(
                           children: [
                             // Product Grid (Constrained Width for Web)
-                            const WebConstrainedBox(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: AppSizes.p24,
-                              ),
-                              child: TrendingGearGrid(),
-                            ),
+                            const TrendingGearGrid(),
 
                             // Shop by Collection Section
                             const ShopByCollectionSection(),

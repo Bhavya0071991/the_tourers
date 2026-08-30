@@ -37,7 +37,7 @@ class _TrendingGearGridState extends ConsumerState<TrendingGearGrid> {
 
     return WebConstrainedBox(
       padding: EdgeInsets.symmetric(
-        horizontal: screenWidth > 900 ? 64.0 : 16.0,
+        horizontal: screenWidth > 900 ? 64.0 : 8.0,
         vertical: screenWidth > 550 ? AppSizes.p64 : AppSizes.p32,
       ),
       child: Column(
@@ -89,9 +89,9 @@ class _TrendingGearGridState extends ConsumerState<TrendingGearGrid> {
                 itemCount: products.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: crossAxisCount,
-                  childAspectRatio: 0.78,
-                  crossAxisSpacing: 20,
-                  mainAxisSpacing: 28,
+                  childAspectRatio: screenWidth <= 550 ? 0.70 : 0.78,
+                  crossAxisSpacing: screenWidth <= 550 ? 12 : 20,
+                  mainAxisSpacing: screenWidth <= 550 ? 16 : 28,
                 ),
                 itemBuilder: (context, index) {
                   return FadeInSlideWidget(

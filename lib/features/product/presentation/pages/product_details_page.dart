@@ -451,7 +451,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             Expanded(
               child: AppText.bebas(
                 product.name.toUpperCase(),
-                fontSize: isDesktop ? 72 : 48,
+                fontSize: isDesktop ? 72 : 32,
                 height: 0.9,
                 color: context.colorScheme.onSurface,
               ),
@@ -492,7 +492,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             ),
           ],
         ),
-        const SizedBox(height: AppSizes.p24),
+        SizedBox(height: isDesktop ? AppSizes.p24 : AppSizes.p16),
 
         // Price Block
         Container(
@@ -512,14 +512,14 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             children: [
               AppText.spaceMono(
                 product.price,
-                fontSize: isDesktop ? 32 : 24,
+                fontSize: isDesktop ? 32 : 20,
                 fontWeight: FontWeight.w700,
                 color: context.colorScheme.onSurface,
               ),
               if (product.originalPrice != null)
                 AppText.spaceMono(
                   product.originalPrice!,
-                  fontSize: isDesktop ? 24 : 18,
+                  fontSize: isDesktop ? 24 : 16,
                   fontWeight: FontWeight.w400,
                   color: Theme.of(
                     context,
@@ -532,7 +532,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
 
         // Product Description
         if (product.description != null && product.description!.isNotEmpty) ...[
-          const SizedBox(height: AppSizes.p32),
+          SizedBox(height: isDesktop ? AppSizes.p32 : AppSizes.p24),
           AppText.spaceMono(
             product.description!,
             fontSize: isDesktop ? 16 : 14,
@@ -542,7 +542,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             ).colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ],
-        const SizedBox(height: AppSizes.p48),
+        SizedBox(height: isDesktop ? AppSizes.p48 : AppSizes.p32),
 
         // Brutalist Badges
         Container(
@@ -558,17 +558,17 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             letterSpacing: 2.0,
           ),
         ),
-        const SizedBox(height: AppSizes.p48),
+        SizedBox(height: isDesktop ? AppSizes.p48 : AppSizes.p32),
 
         // Color Selector
         AppText.spaceMono(
           'SELECT COLOR',
-          fontSize: 16,
+          fontSize: isDesktop ? 16 : 14,
           fontWeight: FontWeight.bold,
           letterSpacing: 2.0,
           color: context.colorScheme.onSurface,
         ),
-        const SizedBox(height: AppSizes.p16),
+        SizedBox(height: isDesktop ? AppSizes.p16 : AppSizes.p12),
         Wrap(
           spacing: 16.0,
           runSpacing: 16.0,
@@ -584,9 +584,9 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                       .updateColor(colorName);
                 },
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 24 : 16,
+                    vertical: isDesktop ? 16 : 12,
                   ),
                   decoration: BoxDecoration(
                     color: isSelected
@@ -599,7 +599,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                   ),
                   child: AppText.spaceMono(
                     colorName.toUpperCase(),
-                    fontSize: 16,
+                    fontSize: isDesktop ? 16 : 14,
                     fontWeight: FontWeight.bold,
                     color: isSelected
                         ? context.colorScheme.surface
@@ -610,7 +610,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             );
           }).toList(),
         ),
-        const SizedBox(height: AppSizes.p48),
+        SizedBox(height: isDesktop ? AppSizes.p48 : AppSizes.p32),
 
         // Size Selector
         Row(
@@ -630,9 +630,9 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                   builder: (_) => const _SizeGuideDialog(),
                 );
               },
-              icon: const Icon(
+              icon: Icon(
                 Icons.straighten,
-                size: 16,
+                size: isDesktop ? 16 : 14,
                 color: AppTheme.neonAccent,
               ),
               label: AppText.spaceMono(
@@ -650,7 +650,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             ),
           ],
         ),
-        const SizedBox(height: AppSizes.p16),
+        SizedBox(height: isDesktop ? AppSizes.p16 : AppSizes.p12),
         Wrap(
           spacing: 16.0,
           runSpacing: 16.0,
@@ -664,8 +664,8 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                   ref.read(productDetailsProvider.notifier).updateSize(size);
                 },
                 child: Container(
-                  width: 64,
-                  height: 64,
+                  width: isDesktop ? 64 : 48,
+                  height: isDesktop ? 64 : 48,
                   decoration: BoxDecoration(
                     color: isSelected
                         ? context.colorScheme.onSurface
@@ -678,7 +678,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                   child: Center(
                     child: AppText.spaceMono(
                       size,
-                      fontSize: isDesktop ? 18 : 16,
+                      fontSize: isDesktop ? 18 : 14,
                       fontWeight: FontWeight.bold,
                       color: isSelected
                           ? context.colorScheme.surface
@@ -690,11 +690,11 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             );
           }).toList(),
         ),
-        const SizedBox(height: AppSizes.p48),
+        SizedBox(height: isDesktop ? AppSizes.p48 : AppSizes.p32),
 
         if (isQuoteProduct) ...[
           _buildQuoteCustomizer(context, product),
-          const SizedBox(height: AppSizes.p48),
+          SizedBox(height: isDesktop ? AppSizes.p48 : AppSizes.p32),
         ],
 
         // Brutalist Add To Bag Button (Desktop only here, Mobile uses sticky bottom bar)

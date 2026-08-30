@@ -89,9 +89,11 @@ class CategoryPage extends ConsumerWidget {
                 slivers: [
                   SliverToBoxAdapter(
                     child: WebConstrainedBox(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: isDesktop ? 64.0 : 24.0,
-                        vertical: 48.0,
+                      padding: EdgeInsets.only(
+                        left: isDesktop ? 64.0 : 24.0,
+                        right: isDesktop ? 64.0 : 24.0,
+                        top: isDesktop ? 48.0 : 32.0,
+                        bottom: isDesktop ? 48.0 : 12.0,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -220,7 +222,7 @@ class CategoryPage extends ConsumerWidget {
                             ),
                             orElse: () => const SizedBox.shrink(),
                           ),
-                          const SizedBox(height: AppSizes.p32),
+                          SizedBox(height: isDesktop ? AppSizes.p32 : AppSizes.p8),
                         ],
                       ),
                     ),
@@ -315,15 +317,15 @@ class CategoryPage extends ConsumerWidget {
 
                       return SliverPadding(
                         padding: EdgeInsets.symmetric(
-                          horizontal: isDesktop ? 64.0 : 24.0,
+                          horizontal: screenWidth <= 550 ? 8.0 : (isDesktop ? 64.0 : 24.0),
                         ),
                         sliver: SliverGrid(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: crossAxisCount,
-                                childAspectRatio: 0.78,
-                                crossAxisSpacing: 20,
-                                mainAxisSpacing: 28,
+                                childAspectRatio: screenWidth <= 550 ? 0.70 : 0.78,
+                                crossAxisSpacing: screenWidth <= 550 ? 12 : 20,
+                                mainAxisSpacing: screenWidth <= 550 ? 16 : 28,
                               ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
