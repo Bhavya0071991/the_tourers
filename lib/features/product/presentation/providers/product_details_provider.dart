@@ -87,11 +87,18 @@ class ProductDetailsNotifier extends Notifier<ProductDetailsState> {
   ) async {
     final productToAdd = product.toMap();
     String? displayImage;
+    String? frontPrintUrl;
 
     if (state.availableColors.containsKey(state.selectedColor) && 
         state.availableColors[state.selectedColor]!.isNotEmpty) {
       displayImage = state.availableColors[state.selectedColor]!.first;
       productToAdd['image'] = displayImage;
+    }
+
+    if (product.colorDesignImages.containsKey(state.selectedColor)) {
+      frontPrintUrl = product.colorDesignImages[state.selectedColor];
+    } else if (product.colorDesignImages.containsKey('Black')) {
+      frontPrintUrl = product.colorDesignImages['Black'];
     }
 
     if (resolvedMockupUrl.isNotEmpty) {
@@ -106,6 +113,7 @@ class ProductDetailsNotifier extends Notifier<ProductDetailsState> {
           '${state.selectedSize} / ${state.selectedColor}',
           customText: customQuote.isNotEmpty ? customQuote : null,
           frontDesignPreview: displayImage,
+          frontPrintUrl: frontPrintUrl,
         );
   }
 }

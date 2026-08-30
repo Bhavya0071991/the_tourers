@@ -105,12 +105,18 @@ serve(async (req) => {
         productDetails = pData;
       }
 
-      // 1. Check if it's a pre-built product from Admin Panel
-      if (productDetails && productDetails.design_image) {
-        console.log(`DEBUG: Found pre-built design_image for product ${productDetails.id}`);
-        finalFrontDesignUrl = productDetails.design_image;
-        finalFrontMockupUrl = productDetails.image || productDetails.design_image;
+      // 1. Check if it's a pre-built product from Admin Panel (Admin uploads transparent png to color_design_images)
+      if (productDetails && productDetails.color_design_images && productDetails.color_design_images.length > 0) {
+        console.log(`DEBUG: Found pre-built transparent image for product ${productDetails.id}`);
+        finalFrontDesignUrl = productDetails.color_design_images[0];
+        finalFrontMockupUrl = productDetails.mockup || productDetails.image || finalFrontDesignUrl;
       } 
+      // 2. Check if a transparent print url was passed in the order item
+      else if (item.front_print_url) {
+        console.log(`DEBUG: Found front_print_url in order item`);
+        finalFrontDesignUrl = item.front_print_url;
+        finalFrontMockupUrl = item.front_mockup_url || item.front_design_preview || item.front_print_url;
+      }
       // 2. Otherwise, check if it's a custom AI Lab design (Base64)
       else if (item.front_design_preview) {
         if (item.front_design_preview.startsWith('http')) {
@@ -141,6 +147,12 @@ serve(async (req) => {
             console.error("DEBUG: Failed to process front design base64", e);
           }
         }
+      }
+      
+      // Fallback for Back Print URL if it exists
+      if (item.back_print_url && !item.back_design_preview) {
+         finalBackDesignUrl = item.back_print_url;
+         finalBackMockupUrl = item.back_mockup_url || item.back_print_url;
       }
 
       // Check Back Design

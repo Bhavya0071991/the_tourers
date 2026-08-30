@@ -92,7 +92,7 @@ class _FooterSectionState extends State<FooterSection>
                             AppStrings.navNewArrival,
                             AppStrings.navMens,
                             AppStrings.navWomens,
-                            'WINTER',
+                            // 'WINTER',
                           ],
                           textColor,
                           fadedTextColor,
@@ -143,7 +143,7 @@ class _FooterSectionState extends State<FooterSection>
                                 AppStrings.navNewArrival,
                                 AppStrings.navMens,
                                 AppStrings.navWomens,
-                                'WINTER',
+                                // 'WINTER',
                               ],
                               textColor,
                               fadedTextColor,
@@ -303,7 +303,40 @@ class _FooterSectionState extends State<FooterSection>
             padding: const EdgeInsets.only(bottom: 16.0),
             child: InkWell(
               onTap: () async {
-                if (link == 'ABOUT US') {
+                if (link == AppStrings.navNewArrival) {
+                  if (GoRouterState.of(context).uri.path == AppPaths.home) {
+                    final scrollable = Scrollable.of(context);
+                    scrollable.position.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                    );
+                  } else {
+                    context.go(AppPaths.home);
+                  }
+                } else if (link == AppStrings.navMens) {
+                  if (GoRouterState.of(context).uri.path == AppPaths.categoryId('mens')) {
+                    final scrollable = Scrollable.of(context);
+                    scrollable.position.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                    );
+                  } else {
+                    context.go(AppPaths.categoryId('mens'));
+                  }
+                } else if (link == AppStrings.navWomens) {
+                  if (GoRouterState.of(context).uri.path == AppPaths.categoryId('womens')) {
+                    final scrollable = Scrollable.of(context);
+                    scrollable.position.animateTo(
+                      0,
+                      duration: const Duration(milliseconds: 500),
+                      curve: Curves.easeInOut,
+                    );
+                  } else {
+                    context.go(AppPaths.categoryId('womens'));
+                  }
+                } else if (link == 'ABOUT US') {
                   context.go(AppPaths.about);
                 } else if (link == 'INSTAGRAM') {
                   final url = Uri.parse('https://www.instagram.com/the_tourers?igsi=MXB5NHkyaTY1dnhuYQ==');

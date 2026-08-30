@@ -11,6 +11,7 @@ class ProductRemoteDataSource {
     int offset = 0,
     String? gender,
     String? tag,
+    String? category,
   }) async {
     var query = _supabase.from('products').select();
 
@@ -22,6 +23,10 @@ class ProductRemoteDataSource {
       query = query.eq('tag', tag);
     }
 
+    if (category != null && category.isNotEmpty && category != 'all') {
+      query = query.eq('category', category);
+    }
+
     final response = await query
         .order('created_at', ascending: false)
         .range(offset, offset + limit - 1);
@@ -29,6 +34,19 @@ class ProductRemoteDataSource {
     return (response as List)
         .map((json) => ProductModel.fromJson(json))
         .toList();
+  }
+
+  Future<bool> hasNewProducts({String? category, int days = 7}) async {
+    final thresholdDate = DateTime.now().subtract(Duration(days: days)).toIso8601String();
+    
+    var query = _supabase.from('products').select('id');
+    
+    if (category != null && category.isNotEmpty && category != 'all') {
+      query = query.eq('category', category);
+    }
+    
+    final response = await query.gte('created_at', thresholdDate).limit(1);
+    return (response as List).isNotEmpty;
   }
 
   Future<ProductModel?> getProduct(String id) async {

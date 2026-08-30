@@ -12,6 +12,7 @@ import '../../../cart/providers/cart_provider.dart';
 import '../../../auth/providers/auth_provider.dart';
 import '../../../notification/presentation/widgets/notification_bell.dart';
 import '../../../../core/widgets/brand_logo_icon.dart';
+import '../../../product/providers/product_provider.dart';
 
 class CustomAppBar extends ConsumerWidget {
   final bool isTransparent;
@@ -33,6 +34,10 @@ class CustomAppBar extends ConsumerWidget {
     final authUsername = ref.watch(
       authProvider.select((state) => state.value?.username),
     );
+
+    final hasNewGlobal = ref.watch(hasNewProductsProvider(null)).value ?? false;
+    final hasNewMens = ref.watch(hasNewProductsProvider('mens')).value ?? false;
+    final hasNewWomens = ref.watch(hasNewProductsProvider('womens')).value ?? false;
 
     return Container(
       padding: EdgeInsets.symmetric(
@@ -76,32 +81,71 @@ class CustomAppBar extends ConsumerWidget {
                       textColor,
                       onTap: () => context.go(AppPaths.home),
                     ),
-                    Positioned(
-                      bottom: -8,
-                      right: 8,
-                      child:
-                          AppText.spaceMono(
-                                'NEW ✨',
-                                fontSize: 8,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.redAccent,
-                              )
-                              .animate(onPlay: (c) => c.repeat(reverse: true))
-                              .fade(duration: 800.ms, begin: 0.3, end: 1.0),
-                    ),
+                    if (hasNewGlobal)
+                      Positioned(
+                        bottom: -8,
+                        right: 8,
+                        child:
+                            AppText.spaceMono(
+                                  'NEW ✨',
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.redAccent,
+                                )
+                                .animate(onPlay: (c) => c.repeat(reverse: true))
+                                .fade(duration: 800.ms, begin: 0.3, end: 1.0),
+                      ),
                   ],
                 ),
                 const SizedBox(width: 32),
-                _buildAnimatedNavLink(
-                  AppStrings.navMens,
-                  textColor,
-                  onTap: () => context.go(AppPaths.categoryId('mens')),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildAnimatedNavLink(
+                      AppStrings.navMens,
+                      textColor,
+                      onTap: () => context.go(AppPaths.categoryId('mens')),
+                    ),
+                    if (hasNewMens)
+                      Positioned(
+                        bottom: -8,
+                        right: 8,
+                        child:
+                            AppText.spaceMono(
+                                  'NEW ✨',
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.redAccent,
+                                )
+                                .animate(onPlay: (c) => c.repeat(reverse: true))
+                                .fade(duration: 800.ms, begin: 0.3, end: 1.0),
+                      ),
+                  ],
                 ),
                 const SizedBox(width: 32),
-                _buildAnimatedNavLink(
-                  AppStrings.navWomens,
-                  textColor,
-                  onTap: () => context.go(AppPaths.categoryId('womens')),
+                Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    _buildAnimatedNavLink(
+                      AppStrings.navWomens,
+                      textColor,
+                      onTap: () => context.go(AppPaths.categoryId('womens')),
+                    ),
+                    if (hasNewWomens)
+                      Positioned(
+                        bottom: -8,
+                        right: 8,
+                        child:
+                            AppText.spaceMono(
+                                  'NEW ✨',
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.redAccent,
+                                )
+                                .animate(onPlay: (c) => c.repeat(reverse: true))
+                                .fade(duration: 800.ms, begin: 0.3, end: 1.0),
+                      ),
+                  ],
                 ),
                 const SizedBox(width: 32),
 
@@ -146,12 +190,15 @@ class CustomAppBar extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(4),
                     onTap: () {
                       _showMobileMenu(
-                        context,
-                        textColor,
-                        cartCount,
-                        authStatus,
-                        authUsername,
-                      );
+                          context,
+                          textColor,
+                          cartCount,
+                          authStatus,
+                          authUsername,
+                          hasNewGlobal,
+                          hasNewMens,
+                          hasNewWomens,
+                        );
                     },
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
@@ -172,6 +219,9 @@ class CustomAppBar extends ConsumerWidget {
     int cartCount,
     AuthStatus authStatus,
     String? authUsername,
+    bool hasNewGlobal,
+    bool hasNewMens,
+    bool hasNewWomens,
   ) {
     showGeneralDialog(
       context: context,
@@ -265,50 +315,75 @@ class CustomAppBar extends ConsumerWidget {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.end,
-                                  children: [
-                                    _buildMobileMenuItem(
-                                      context,
-                                      0,
-                                      AppStrings.navNewArrival,
-                                      () {
-                                        Navigator.pop(context);
-                                        context.go(AppPaths.home);
-                                      },
+                                _buildMobileMenuItem(
+                                  context,
+                                  0,
+                                  AppStrings.navNewArrival,
+                                  () {
+                                    Navigator.pop(context);
+                                    context.go(AppPaths.home);
+                                  },
+                                  subtitle: hasNewGlobal ? Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 24.0, top: 0.0),
+                                      child: AppText.spaceMono(
+                                        'NEW ✨',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.redAccent,
+                                      )
+                                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                                      .fade(duration: 800.ms, begin: 0.3, end: 1.0),
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 20.0,
-                                        bottom: 8.0,
-                                      ),
-                                      child:
-                                          AppText.spaceMono(
-                                                'NEW ✨',
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.redAccent,
-                                              )
-                                              .animate(
-                                                onPlay: (c) =>
-                                                    c.repeat(reverse: true),
-                                              )
-                                              .fade(
-                                                duration: 800.ms,
-                                                begin: 0.3,
-                                                end: 1.0,
-                                              ),
-                                    ),
-                                  ],
+                                  ) : null,
                                 ),
-                                _buildMobileMenuItem(context, 1, 'MENS', () {
-                                  Navigator.pop(context);
-                                  context.go(AppPaths.categoryId('mens'));
-                                }),
-                                _buildMobileMenuItem(context, 2, 'WOMENS', () {
-                                  Navigator.pop(context);
-                                  context.go(AppPaths.categoryId('womens'));
-                                }),
+                                _buildMobileMenuItem(
+                                  context, 
+                                  1, 
+                                  'MENS', 
+                                  () {
+                                    Navigator.pop(context);
+                                    context.go(AppPaths.categoryId('mens'));
+                                  },
+                                  subtitle: hasNewMens ? Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 24.0, top: 0.0),
+                                      child: AppText.spaceMono(
+                                        'NEW ✨',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.redAccent,
+                                      )
+                                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                                      .fade(duration: 800.ms, begin: 0.3, end: 1.0),
+                                    ),
+                                  ) : null,
+                                ),
+                                _buildMobileMenuItem(
+                                  context, 
+                                  2, 
+                                  'WOMENS', 
+                                  () {
+                                    Navigator.pop(context);
+                                    context.go(AppPaths.categoryId('womens'));
+                                  },
+                                  subtitle: hasNewWomens ? Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(left: 24.0, top: 0.0),
+                                      child: AppText.spaceMono(
+                                        'NEW ✨',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.redAccent,
+                                      )
+                                      .animate(onPlay: (c) => c.repeat(reverse: true))
+                                      .fade(duration: 800.ms, begin: 0.3, end: 1.0),
+                                    ),
+                                  ) : null,
+                                ),
 
                                 // _buildMobileMenuItem(
                                 //   context,
@@ -438,6 +513,7 @@ class CustomAppBar extends ConsumerWidget {
     String title,
     VoidCallback onTap, {
     Widget? trailing,
+    Widget? subtitle,
   }) {
     return Material(
       color: Colors.transparent,
@@ -478,10 +554,13 @@ class CustomAppBar extends ConsumerWidget {
 
               // Text sliding in with a cyberpunk shimmer
               Expanded(
-                child:
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
                     AppText.bebas(
                           title,
-                          fontSize: 22, // Slightly smaller text as requested
+                          fontSize: 22,
                           letterSpacing: 2.5,
                           color: Colors.white,
                         )
@@ -494,11 +573,13 @@ class CustomAppBar extends ConsumerWidget {
                         )
                         .fadeIn(duration: 300.ms)
                         .shimmer(
-                          delay: (600 + index * 100)
-                              .ms, // Shimmer plays after it settles
+                          delay: (600 + index * 100).ms,
                           duration: 800.ms,
                           color: AppTheme.neonAccent.withValues(alpha: 0.5),
                         ),
+                    if (subtitle != null) subtitle,
+                  ],
+                ),
               ),
               ?trailing,
             ],

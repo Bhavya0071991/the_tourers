@@ -9,8 +9,25 @@ class ProductRepositoryImpl implements ProductRepository {
   ProductRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<List<Product>> getProducts({int limit = 10, int offset = 0, String? gender, String? tag}) async {
-    return await _remoteDataSource.getProducts(limit: limit, offset: offset, gender: gender, tag: tag);
+  Future<List<Product>> getProducts({
+    int limit = 10,
+    int offset = 0,
+    String? gender,
+    String? tag,
+    String? category,
+  }) async {
+    return await _remoteDataSource.getProducts(
+      limit: limit,
+      offset: offset,
+      gender: gender,
+      tag: tag,
+      category: category,
+    );
+  }
+
+  @override
+  Future<bool> hasNewProducts({String? category, int days = 7}) async {
+    return await _remoteDataSource.hasNewProducts(category: category, days: days);
   }
 
   @override
@@ -29,6 +46,7 @@ class ProductRepositoryImpl implements ProductRepository {
       image: product.image,
       images: product.images,
       colorImages: product.colorImages,
+      colorDesignImages: product.colorDesignImages,
       mockup: product.mockup,
       tag: product.tag,
       gender: product.gender,
@@ -48,6 +66,7 @@ class ProductRepositoryImpl implements ProductRepository {
       image: product.image,
       images: product.images,
       colorImages: product.colorImages,
+      colorDesignImages: product.colorDesignImages,
       mockup: product.mockup,
       tag: product.tag,
       gender: product.gender,

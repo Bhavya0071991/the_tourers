@@ -28,6 +28,7 @@ class AppText extends StatelessWidget {
     int? maxLines,
     TextOverflow? overflow,
     TextAlign? textAlign,
+    List<Shadow>? shadows,
   }) {
     return AppText._(
       key: key,
@@ -40,6 +41,7 @@ class AppText extends StatelessWidget {
         color: color,
         letterSpacing: letterSpacing,
         height: height,
+        shadows: shadows,
       ),
     );
   }

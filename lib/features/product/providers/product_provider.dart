@@ -7,11 +7,12 @@ import 'product_dependency_providers.dart';
 class ProductFilter extends Equatable {
   final String? gender;
   final String? tag;
+  final String? category;
 
-  const ProductFilter({this.gender, this.tag});
+  const ProductFilter({this.gender, this.tag, this.category});
 
   @override
-  List<Object?> get props => [gender, tag];
+  List<Object?> get props => [gender, tag, category];
 }
 
 class PaginatedProductsState {
@@ -54,6 +55,7 @@ class PaginatedProductsNotifier extends AsyncNotifier<PaginatedProductsState> {
       offset: _offset,
       gender: filter.gender,
       tag: filter.tag,
+      category: filter.category,
     );
     return PaginatedProductsState(
       products: products,
@@ -79,6 +81,7 @@ class PaginatedProductsNotifier extends AsyncNotifier<PaginatedProductsState> {
         offset: _offset,
         gender: filter.gender,
         tag: filter.tag,
+        category: filter.category,
       );
 
       state = AsyncData(
@@ -98,6 +101,11 @@ final paginatedProductsProvider = AsyncNotifierProvider.autoDispose
     .family<PaginatedProductsNotifier, PaginatedProductsState, ProductFilter>(
       PaginatedProductsNotifier.new,
     );
+
+final hasNewProductsProvider = FutureProvider.family<bool, String?>((ref, category) async {
+  final repository = ref.watch(productRepositoryProvider);
+  return repository.hasNewProducts(category: category, days: 7);
+});
 
 class ProductOperationsNotifier extends Notifier<void> {
   @override

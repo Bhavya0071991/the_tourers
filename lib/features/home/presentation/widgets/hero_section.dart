@@ -177,6 +177,13 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                             height: 0.85,
                             letterSpacing: isDesktop ? 4.0 : 2.0,
                             color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                offset: const Offset(2, 4),
+                                blurRadius: 8,
+                              ),
+                            ],
                           )
                           .animate(key: ValueKey('title_$currentPage'))
                           .fadeIn(duration: 1000.ms, curve: Curves.easeOut)
@@ -314,9 +321,12 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                     child: _buildNavButton(
                       icon: Icons.arrow_back_ios_new,
                       onPressed: () {
-                        final prevIndex =
-                            currentPage == 0 ? banners.length - 1 : currentPage - 1;
-                        ref.read(heroViewModelProvider.notifier).setPage(prevIndex);
+                        final prevIndex = currentPage == 0
+                            ? banners.length - 1
+                            : currentPage - 1;
+                        ref
+                            .read(heroViewModelProvider.notifier)
+                            .setPage(prevIndex);
                       },
                     ),
                   ),
@@ -330,7 +340,9 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                       icon: Icons.arrow_forward_ios,
                       onPressed: () {
                         final nextIndex = (currentPage + 1) % banners.length;
-                        ref.read(heroViewModelProvider.notifier).setPage(nextIndex);
+                        ref
+                            .read(heroViewModelProvider.notifier)
+                            .setPage(nextIndex);
                       },
                     ),
                   ),

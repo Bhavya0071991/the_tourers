@@ -28,7 +28,7 @@ class _TrendingGearGridState extends ConsumerState<TrendingGearGrid> {
     } else if (screenWidth > 800) {
       crossAxisCount = 3;
     } else if (screenWidth <= 550) {
-      crossAxisCount = 1;
+      crossAxisCount = 2;
     }
 
     final productsAsync = ref.watch(
@@ -38,7 +38,7 @@ class _TrendingGearGridState extends ConsumerState<TrendingGearGrid> {
     return WebConstrainedBox(
       padding: EdgeInsets.symmetric(
         horizontal: screenWidth > 900 ? 64.0 : 16.0,
-        vertical: AppSizes.p64,
+        vertical: screenWidth > 550 ? AppSizes.p64 : AppSizes.p32,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

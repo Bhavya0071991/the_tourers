@@ -39,7 +39,8 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
   final List<_ColorVariantData> _colorVariants = [];
   final ImagePicker _picker = ImagePicker();
 
-  bool _isLoading = false;
+  bool _isSubmitting = false;
+  bool _isDeleting = false;
 
   bool get isEditing => widget.productId != null;
 
@@ -208,7 +209,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
       }
 
       setState(() {
-        _isLoading = true;
+        _isSubmitting = true;
       });
 
       try {
@@ -280,7 +281,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
       } finally {
         if (context.mounted) {
           setState(() {
-            _isLoading = false;
+            _isSubmitting = false;
           });
         }
       }
@@ -291,21 +292,21 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
     if (!isEditing) return;
 
     setState(() {
-      _isLoading = true;
+      _isDeleting = true;
     });
 
     try {
       await ref.read(productOperationsProvider.notifier).deleteProduct(widget.productId!);
       if (!context.mounted) return;
       AppSnackBar.show(context, 'Product deleted successfully!');
-      context.go(AppPaths.adminProducts);
+      if (context.mounted) context.go(AppPaths.adminProducts);
     } catch (e) {
       if (!context.mounted) return;
       AppSnackBar.show(context, 'Failed to delete product: $e');
     } finally {
       if (context.mounted) {
         setState(() {
-          _isLoading = false;
+          _isDeleting = false;
         });
       }
     }
@@ -474,21 +475,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                       style: TextStyle(fontFamily: 'SpaceMono'),
                                     ),
                                   ),
-                                  DropdownMenuItem(
-                                    value: 'anime',
-                                    child: Text(
-                                      'ANIME',
-                                      style: TextStyle(fontFamily: 'SpaceMono'),
-                                    ),
-                                  ),
-                                  DropdownMenuItem(
-                                    value: 'custom',
-                                    child: Text(
-                                      'CUSTOM',
-                                      style: TextStyle(fontFamily: 'SpaceMono'),
-                                    ),
-                                  ),
-                                ],
+                                  ],
                                 onChanged: (val) {
                                   if (val != null) {
                                     setState(() => _selectedCategory = val);
@@ -708,7 +695,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                         shadowColor: textColor.withValues(alpha: 0.2),
                         offset: const Offset(4, 4),
                         child: ElevatedButton(
-                          onPressed: _isLoading ? null : _submit,
+                          onPressed: (_isSubmitting || _isDeleting) ? null : _submit,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: textColor,
                             foregroundColor: surfaceColor,
@@ -717,7 +704,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                               borderRadius: BorderRadius.zero,
                             ),
                           ),
-                          child: _isLoading
+                          child: _isSubmitting
                               ? SizedBox(
                                   height: 24,
                                   width: 24,
@@ -742,7 +729,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                           shadowColor: Colors.red.withValues(alpha: 0.2),
                           offset: const Offset(4, 4),
                           child: ElevatedButton(
-                            onPressed: _isLoading ? null : _deleteProduct,
+                            onPressed: (_isSubmitting || _isDeleting) ? null : _deleteProduct,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
@@ -751,7 +738,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                 borderRadius: BorderRadius.zero,
                               ),
                             ),
-                            child: _isLoading
+                            child: _isDeleting
                                 ? const SizedBox(
                                     height: 24,
                                     width: 24,

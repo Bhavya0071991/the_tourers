@@ -11,63 +11,86 @@ import '../widgets/trending_gear_grid.dart';
 import '../widgets/shop_by_collection_section.dart';
 import '../widgets/footer_section.dart';
 
-class HomePage extends ConsumerWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends ConsumerState<HomePage> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       backgroundColor: Colors.black87.withValues(alpha: 0.9),
-      body: Column(
-        children: [
-          // The top web promo banner
-          const PromoBanner(),
+      body: PrimaryScrollController(
+        controller: _scrollController,
+        child: Column(
+          children: [
+            // The top web promo banner
+            const PromoBanner(),
 
-          // Standard E-commerce App Bar (Solid, top of the page)
-          const WebConstrainedBox(child: CustomAppBar(isTransparent: false)),
+            // Standard E-commerce App Bar (Solid, top of the page)
+            const WebConstrainedBox(child: CustomAppBar(isTransparent: false)),
 
-          Expanded(
-            child: RefreshIndicator(
-              onRefresh: () async {
-                ref.invalidate(paginatedProductsProvider);
-              },
-              child: SingleChildScrollView(
-                physics: const AlwaysScrollableScrollPhysics(),
-                child: Column(
-                  children: [
-                    // The Hero Section below the app bar
-                    const HeroSection(),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: () async {
+                  ref.invalidate(paginatedProductsProvider);
+                },
+                child: SingleChildScrollView(
+                  primary: true,
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      // The Hero Section below the app bar
+                      const HeroSection(),
 
-                    // Below the fold sections
-                    SizedBox(
-                      width: double.infinity,
-                      child: const Column(
-                        children: [
-                          // Product Grid (Constrained Width for Web)
-                          WebConstrainedBox(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: AppSizes.p24,
+                      // Below the fold sections
+                      SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          children: [
+                            // Product Grid (Constrained Width for Web)
+                            const WebConstrainedBox(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: AppSizes.p24,
+                              ),
+                              child: TrendingGearGrid(),
                             ),
-                            child: TrendingGearGrid(),
-                          ),
 
-                          // Shop by Collection Section
-                          ShopByCollectionSection(),
+                            // Shop by Collection Section
+                            const ShopByCollectionSection(),
 
-                          // Bottom spacing
-                          SizedBox(height: AppSizes.p64),
+                            // Bottom spacing
+                            SizedBox(
+                              height: screenWidth > 550
+                                  ? AppSizes.p64
+                                  : AppSizes.p24,
+                            ),
 
-                          // The new Brutalist Footer
-                          FooterSection(),
-                        ],
+                            // The new Brutalist Footer
+                            const FooterSection(),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

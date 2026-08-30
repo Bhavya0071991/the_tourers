@@ -14,7 +14,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../../providers/product_provider.dart';
 
-final categoryFilterProvider = StateProvider.family<String, String>((ref, category) => 'ALL');
+final categoryFilterProvider = StateProvider.autoDispose.family<String, String>(
+  (ref, category) => 'ALL',
+);
 
 class CategoryPage extends ConsumerWidget {
   final String category; // 'mens' or 'womens'
@@ -24,14 +26,25 @@ class CategoryPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedFilter = ref.watch(categoryFilterProvider(category));
-    final filters = const ['ALL', 'QUOTE', 'DESIGNS', 'CUSTOMS'];
+    final filters = const ['ALL', 'DESIGNS', 'QUOTES'];
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth > 900;
+
+    String? mapFilterToCategory(String filter) {
+      switch (filter) {
+        case 'DESIGNS':
+          return 'design';
+        case 'QUOTES':
+          return 'quotes';
+        default:
+          return null;
+      }
+    }
 
     // Filter products based on category route and active selection
     final filter = ProductFilter(
       gender: category.toLowerCase(),
-      tag: selectedFilter == 'ALL' ? null : selectedFilter,
+      category: mapFilterToCategory(selectedFilter),
     );
     final productsAsync = ref.watch(paginatedProductsProvider(filter));
 
@@ -41,7 +54,7 @@ class CategoryPage extends ConsumerWidget {
     } else if (screenWidth > 800) {
       crossAxisCount = 3;
     } else if (screenWidth <= 550) {
-      crossAxisCount = 1;
+      crossAxisCount = 2;
     }
 
     final categoryTitle = category == 'mens'
@@ -63,12 +76,16 @@ class CategoryPage extends ConsumerWidget {
           Expanded(
             child: NotificationListener<ScrollNotification>(
               onNotification: (ScrollNotification scrollInfo) {
-                if (scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
-                  ref.read(paginatedProductsProvider(filter).notifier).loadMore();
+                if (scrollInfo.metrics.pixels >=
+                    scrollInfo.metrics.maxScrollExtent - 200) {
+                  ref
+                      .read(paginatedProductsProvider(filter).notifier)
+                      .loadMore();
                 }
                 return false;
               },
               child: CustomScrollView(
+                key: ValueKey(category),
                 slivers: [
                   SliverToBoxAdapter(
                     child: WebConstrainedBox(
@@ -82,7 +99,7 @@ class CategoryPage extends ConsumerWidget {
                           // Giant Header Title
                           AppText.bebas(
                             categoryTitle,
-                            fontSize: isDesktop ? 96 : 56,
+                            fontSize: isDesktop ? 96 : 42,
                             height: 0.9,
                             letterSpacing: 4.0,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -94,7 +111,7 @@ class CategoryPage extends ConsumerWidget {
                             constraints: const BoxConstraints(maxWidth: 800),
                             child: AppText.spaceMono(
                               categorySubtitle,
-                              fontSize: 16,
+                              fontSize: isDesktop ? 16 : 14,
                               color: Theme.of(
                                 context,
                               ).colorScheme.onSurface.withValues(alpha: 0.7),
@@ -106,7 +123,7 @@ class CategoryPage extends ConsumerWidget {
                           // Filter Row - Custom Interactive Brutalist Chips
                           AppText.spaceMono(
                             AppStrings.filterCategoryMarquee,
-                            fontSize: 14,
+                            fontSize: isDesktop ? 14 : 12,
                             fontWeight: FontWeight.bold,
                             letterSpacing: 2.0,
                             color: Theme.of(context).colorScheme.onSurface,
@@ -127,12 +144,21 @@ class CategoryPage extends ConsumerWidget {
                                   ),
                                   child: InkWell(
                                     onTap: () =>
-                                        ref.read(categoryFilterProvider(category).notifier).state = f,
+                                        ref
+                                                .read(
+                                                  categoryFilterProvider(
+                                                    category,
+                                                  ).notifier,
+                                                )
+                                                .state =
+                                            f,
                                     child: AnimatedContainer(
-                                      duration: const Duration(milliseconds: 150),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 28.0,
-                                        vertical: 16.0,
+                                      duration: const Duration(
+                                        milliseconds: 150,
+                                      ),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: isDesktop ? 28.0 : 20.0,
+                                        vertical: isDesktop ? 16.0 : 12.0,
                                       ),
                                       decoration: BoxDecoration(
                                         color: isSelected
@@ -151,7 +177,7 @@ class CategoryPage extends ConsumerWidget {
                                       ),
                                       child: AppText.spaceMono(
                                         f,
-                                        fontSize: 14,
+                                        fontSize: isDesktop ? 14 : 12,
                                         fontWeight: FontWeight.w700,
                                         color: isSelected
                                             ? Theme.of(
@@ -181,16 +207,14 @@ class CategoryPage extends ConsumerWidget {
                                   ),
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.5),
                                 ),
                                 Container(
                                   height: 2,
                                   width: 100,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface.withValues(alpha: 0.1),
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.1),
                                 ),
                               ],
                             ),
@@ -254,9 +278,15 @@ class CategoryPage extends ConsumerWidget {
                                     shadowColor: AppTheme.neonAccent,
                                     offset: const Offset(4, 4),
                                     child: ElevatedButton(
-                                      onPressed: () => ref
-                                          .read(categoryFilterProvider(category).notifier)
-                                          .state = 'ALL',
+                                      onPressed: () =>
+                                          ref
+                                                  .read(
+                                                    categoryFilterProvider(
+                                                      category,
+                                                    ).notifier,
+                                                  )
+                                                  .state =
+                                              'ALL',
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Theme.of(
                                           context,
@@ -288,12 +318,13 @@ class CategoryPage extends ConsumerWidget {
                           horizontal: isDesktop ? 64.0 : 24.0,
                         ),
                         sliver: SliverGrid(
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: crossAxisCount,
-                            childAspectRatio: 0.78,
-                            crossAxisSpacing: 20,
-                            mainAxisSpacing: 28,
-                          ),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: crossAxisCount,
+                                childAspectRatio: 0.78,
+                                crossAxisSpacing: 20,
+                                mainAxisSpacing: 28,
+                              ),
                           delegate: SliverChildBuilderDelegate(
                             (context, index) {
                               if (index == state.products.length) {
@@ -305,7 +336,9 @@ class CategoryPage extends ConsumerWidget {
                                 product: state.products[index],
                               );
                             },
-                            childCount: state.products.length + (state.isLoadingMore ? 1 : 0),
+                            childCount:
+                                state.products.length +
+                                (state.isLoadingMore ? 1 : 0),
                           ),
                         ),
                       );
