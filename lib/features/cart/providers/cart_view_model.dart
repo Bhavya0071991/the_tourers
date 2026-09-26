@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CartViewState {
   final double discountPercentage;
@@ -30,24 +31,50 @@ class CartViewModel extends Notifier<CartViewState> {
     return const CartViewState();
   }
 
-  String applyPromoCode(String code) {
+  Future<String> applyPromoCode(String code) async {
     final cleanCode = code.trim().toUpperCase();
-    if (cleanCode == 'TOURER15') {
+    if (cleanCode.isEmpty) return 'ERROR: PLEASE ENTER A PROMO CODE';
+
+    try {
+      final response = await Supabase.instance.client
+          .from('promo_codes')
+          .select()
+          .eq('code', cleanCode)
+          .eq('is_active', true)
+          .maybeSingle();
+
+      if (response == null) {
+        return 'ERROR: PROMO CODE EXPIRED OR INVALID';
+      }
+
+      // Check expiry date
+      if (response['expiry_date'] != null) {
+        final expiry = DateTime.parse(response['expiry_date']);
+        if (DateTime.now().isAfter(expiry)) {
+          return 'ERROR: PROMO CODE HAS EXPIRED';
+        }
+      }
+
+      // Check usage limit
+      if (response['usage_limit'] != null) {
+        final usageLimit = response['usage_limit'] as int;
+        final timesUsed = response['times_used'] as int? ?? 0;
+        if (timesUsed >= usageLimit) {
+          return 'ERROR: PROMO CODE USAGE LIMIT REACHED';
+        }
+      }
+
+      final discountPercentage = (response['discount_percentage'] as num).toDouble();
+
       state = state.copyWith(
-        discountPercentage: 0.15,
+        discountPercentage: discountPercentage / 100.0,
         isPromoApplied: true,
         appliedPromoCode: cleanCode,
       );
-      return 'PROMO CODE APPLIED: 15% DISCOUNT GRANTED!';
-    } else if (cleanCode == 'ANTIGRAVITY') {
-      state = state.copyWith(
-        discountPercentage: 0.20,
-        isPromoApplied: true,
-        appliedPromoCode: cleanCode,
-      );
-      return 'PROMO CODE APPLIED: 20% LAB DISCOUNT GRANTED!';
-    } else {
-      return 'ERROR: PROMO CODE EXPIRED OR INVALID';
+
+      return 'PROMO CODE APPLIED: ${discountPercentage.toStringAsFixed(0)}% DISCOUNT GRANTED!';
+    } catch (e) {
+      return 'ERROR: FAILED TO VERIFY PROMO CODE';
     }
   }
 

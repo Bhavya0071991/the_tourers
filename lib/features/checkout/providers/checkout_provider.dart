@@ -14,6 +14,7 @@ class CheckoutState {
   final CheckoutStatus status;
   final String? errorMessage;
   final double discountPercentage;
+  final String? promoCode;
 
   const CheckoutState({
     this.selectedAddress,
@@ -22,6 +23,7 @@ class CheckoutState {
     this.status = CheckoutStatus.idle,
     this.errorMessage,
     this.discountPercentage = 0.0,
+    this.promoCode,
   });
 
   CheckoutState copyWith({
@@ -31,6 +33,7 @@ class CheckoutState {
     CheckoutStatus? status,
     String? errorMessage,
     double? discountPercentage,
+    String? promoCode,
   }) {
     return CheckoutState(
       selectedAddress: selectedAddress ?? this.selectedAddress,
@@ -39,6 +42,7 @@ class CheckoutState {
       status: status ?? this.status,
       errorMessage: errorMessage,
       discountPercentage: discountPercentage ?? this.discountPercentage,
+      promoCode: promoCode ?? this.promoCode,
     );
   }
 }
@@ -46,11 +50,16 @@ class CheckoutState {
 class CheckoutNotifier extends Notifier<CheckoutState> {
   @override
   CheckoutState build() {
-    final address = ref.watch(selectedAddressProvider);
-    final delivery = ref.watch(selectedDeliveryProvider);
+    ref.listen(selectedAddressProvider, (prev, next) {
+      state = state.copyWith(selectedAddress: next);
+    });
+    ref.listen(selectedDeliveryProvider, (prev, next) {
+      state = state.copyWith(selectedDelivery: next);
+    });
+
     return CheckoutState(
-      selectedAddress: address,
-      selectedDelivery: delivery,
+      selectedAddress: ref.read(selectedAddressProvider),
+      selectedDelivery: ref.read(selectedDeliveryProvider),
     );
   }
 
@@ -66,8 +75,8 @@ class CheckoutNotifier extends Notifier<CheckoutState> {
     state = state.copyWith(selectedPaymentMethod: method);
   }
 
-  void setDiscount(double percentage) {
-    state = state.copyWith(discountPercentage: percentage);
+  void setDiscount(double percentage, String? code) {
+    state = state.copyWith(discountPercentage: percentage, promoCode: code);
   }
 
   Future<void> processPayment() async {
@@ -102,15 +111,13 @@ final checkoutDeliveryChargeProvider = Provider<double>((ref) {
 });
 
 final checkoutGstProvider = Provider<double>((ref) {
-  final subtotal = ref.watch(checkoutSubtotalProvider);
-  final discount = ref.watch(checkoutDiscountProvider);
-  return (subtotal - discount) * 0.18; // 18% GST
+  // GST is already included in the product price, so we don't add extra
+  return 0.0;
 });
 
 final checkoutTotalProvider = Provider<double>((ref) {
   final subtotal = ref.watch(checkoutSubtotalProvider);
   final discount = ref.watch(checkoutDiscountProvider);
   final delivery = ref.watch(checkoutDeliveryChargeProvider);
-  final gst = ref.watch(checkoutGstProvider);
-  return subtotal - discount + delivery + gst;
+  return subtotal - discount + delivery;
 });

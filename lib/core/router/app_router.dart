@@ -28,6 +28,7 @@ import '../../features/admin/presentation/pages/admin_dashboard_page.dart';
 import '../../features/admin/presentation/pages/admin_orders_page.dart';
 import '../../features/admin/presentation/pages/admin_order_details_page.dart';
 import '../../features/admin/presentation/pages/admin_customers_page.dart';
+import '../../features/admin/presentation/pages/admin_promos_page.dart';
 import '../../features/admin/presentation/pages/admin_customer_details_page.dart';
 import '../../features/admin/presentation/pages/admin_settings_page.dart';
 import '../../features/admin/presentation/pages/admin_login_page.dart';
@@ -66,6 +67,7 @@ enum AppRoute {
   adminOrderDetails,
   adminProducts,
   adminBanners,
+  adminPromos,
   adminMarquee,
   adminCollections,
   adminAddProduct,
@@ -441,6 +443,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               context: context,
               state: state,
               child: const AdminBannersPage(),
+            ),
+          ),
+          GoRoute(
+            path: AppPaths.adminPromos,
+            name: AppRoute.adminPromos.name,
+            pageBuilder: (context, state) => _buildPageWithDefaultTransition(
+              context: context,
+              state: state,
+              child: const AdminPromosPage(),
             ),
           ),
           GoRoute(

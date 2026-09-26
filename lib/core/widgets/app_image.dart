@@ -25,6 +25,22 @@ class AppImage extends StatelessWidget {
     this.errorWidget,
   });
 
+  /// Pre-cache a list of image URLs (useful for above-the-fold images).
+  static Future<void> precacheImages(
+    BuildContext context,
+    List<String> urls, {
+    int? cacheWidth,
+  }) async {
+    for (final url in urls) {
+      if (url.startsWith('http')) {
+        precacheImage(
+          CachedNetworkImageProvider(url),
+          context,
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     if (imageUrl.startsWith('data:image')) {
@@ -51,6 +67,8 @@ class AppImage extends StatelessWidget {
         alignment: alignment,
         memCacheWidth: memCacheWidth,
         memCacheHeight: memCacheHeight,
+        fadeInDuration: const Duration(milliseconds: 200),
+        fadeOutDuration: const Duration(milliseconds: 100),
         placeholder: (context, url) => SkeletonLoader(
           width: width ?? double.infinity,
           height: height ?? double.infinity,

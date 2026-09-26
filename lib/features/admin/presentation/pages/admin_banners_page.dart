@@ -379,10 +379,8 @@ class _BannerDialogState extends ConsumerState<_BannerDialog> {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(
       source: ImageSource.gallery,
-      imageQuality:
-          85, // Compresses file size significantly while retaining high visual quality
-      maxWidth:
-          1920, // Prevents massive 4K+ images from taking up unnecessary space
+      imageQuality: 70, // Compresses file size significantly while retaining high visual quality
+      maxWidth: 1920, // Prevents massive 4K+ images from taking up unnecessary space
     );
 
     if (pickedFile != null) {

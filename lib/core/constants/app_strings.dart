@@ -39,13 +39,15 @@ class AppStrings {
 
   // Benefits (Care Instructions)
   static const String benefit1Title = 'Drying';
-  static const String benefit1Desc = 'Tumble dry low, or hang-dry in shade for the longest life.';
+  static const String benefit1Desc = 'Dry on low heat.';
   static const String benefit2Title = 'Ironing';
-  static const String benefit2Desc = 'Iron inside-out. Do not iron on decoration.';
+  static const String benefit2Desc =
+      'Iron inside-out. Do not iron on decoration.';
   static const String benefit3Title = 'Washing';
-  static const String benefit3Desc = 'Machine wash cold, inside-out, gentle cycle with mild detergent & similar colors.';
+  static const String benefit3Desc = 'Wash inside-out in cold water.';
   static const String benefit4Title = 'Bleaching';
-  static const String benefit4Desc = 'Employ non-chlorine bleach solely when it is essential.';
+  static const String benefit4Desc =
+      'Employ non-chlorine bleach solely when it is essential.';
 
   // Pillars
   static const String pillar1Title = 'HEAVY COTTON';
@@ -97,6 +99,27 @@ class AppStrings {
   static const String productShippingHeading = 'SHIPPING & RETURNS';
   static const String productShippingBody =
       'Free shipping on all orders over ₹5,000. 30-day return policy. No questions asked.';
+  static const String productNoReviews =
+      'Be the first to review this product.\nYou can leave a review from the "My Orders" page after purchasing.';
+
+  // Shipping Info
+  static const String productShippingInfoTitle = 'Shipping Info';
+  static const String productShippingInfoBody = 'We offer free shipping across India.';
+  static const String productDispatchTitle = '2-3 Days Dispatch';
+  static const String productDispatchBody = 'Orders are printed and processed within 2-3 business days.';
+  static const String productDeliveryTitle = '2-5 Days Delivery';
+  static const String productDeliveryBody = 'Once dispatched, delivery takes 2-5 working days depending on your location.\nMetros: 2-3 days\nRest of India: 3-5 days';
+  static const String productSupportTitle = 'Customer Support';
+  static const String productSupportEmail = 'support@thetourers.in';
+
+  // Returns Policy
+  static const String productReturnsGeneral = 'Because our items are custom-printed on demand, we do not offer general returns or exchanges for size or preference.';
+  static const String productDefectTitle = 'Damaged or Defective Products';
+  static const String productDefectBody = 'If you receive a defective or damaged product, you can request a replacement or refund within 7 days of delivery.';
+  static const String productEvidenceTitle = 'Required Evidence';
+  static const String productEvidenceBody = 'To process a defect claim, you must provide an unboxing video, photographs of the damaged product, and the original packaging. Please contact support to initiate the process.';
+  static const String productRtoTitle = 'Incorrect Address / RTO';
+  static const String productRtoBody = 'We are not responsible for packages lost or returned due to an incorrectly provided address. Re-shipping returned items may incur additional courier charges.';
 
   // Checkout Receipt Dialog
   static const String invoiceTitle = '/// ORDER INVOICE';
@@ -166,11 +189,14 @@ class AppStrings {
 
   // Admin Login
   static const String adminLoginSuccess = 'Admin Login Successful';
-  static const String adminAccessDenied = 'Access Denied: You do not have admin privileges';
-  static const String adminEnterEmailPassword = 'Please enter email and password';
+  static const String adminAccessDenied =
+      'Access Denied: You do not have admin privileges';
+  static const String adminEnterEmailPassword =
+      'Please enter email and password';
   static const String adminHeaderTitle = 'EPOD ADMIN';
   static const String adminLoginTitle = 'ADMIN LOGIN';
-  static const String adminLoginSubtitle = 'Access the EPOD administrative panel.';
+  static const String adminLoginSubtitle =
+      'Access the EPOD administrative panel.';
   static const String adminEmailHint = 'ADMIN EMAIL';
   static const String adminPasswordHint = 'PASSWORD';
   static const String adminEnterDashboard = 'ENTER DASHBOARD';
@@ -280,5 +306,6 @@ class AppStrings {
       'INITIATING APPLE OAUTH PROTOCOL...';
   static const String authApple = 'APPLE';
   static const String authForgotPassword = 'FORGOT PASSWORD?';
-  static const String authResetPasswordSent = 'PASSWORD RESET LINK SENT TO EMAIL!';
+  static const String authResetPasswordSent =
+      'PASSWORD RESET LINK SENT TO EMAIL!';
 }

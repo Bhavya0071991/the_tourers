@@ -127,6 +127,7 @@ class OrderNotifier extends AsyncNotifier<List<OrderModel>> {
     required double discount,
     required double gst,
     required double total,
+    String? promoCode,
   }) async {
     final user = ref.read(authProvider).value;
     if (user == null || user.status != AuthStatus.authenticated) {
@@ -141,6 +142,7 @@ class OrderNotifier extends AsyncNotifier<List<OrderModel>> {
           'shipping_address_id': address.id,
           'delivery_method_id': delivery.id,
           'payment_method': paymentMethod,
+          if (promoCode != null && promoCode.isNotEmpty) 'promo_code': promoCode,
         },
       );
 

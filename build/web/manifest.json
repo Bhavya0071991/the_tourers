@@ -1,6 +1,6 @@
 {
-    "name": "dummy_epod",
-    "short_name": "dummy_epod",
+    "name": "The Tourers",
+    "short_name": "The Tourers",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

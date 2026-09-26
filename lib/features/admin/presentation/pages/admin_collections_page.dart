@@ -249,6 +249,8 @@ class _AdminCollectionsPageState extends ConsumerState<AdminCollectionsPage> {
             Future<void> pickImage() async {
               final XFile? image = await _picker.pickImage(
                 source: ImageSource.gallery,
+                imageQuality: 70,
+                maxWidth: 1920,
               );
               if (image != null) {
                 if (kIsWeb) {

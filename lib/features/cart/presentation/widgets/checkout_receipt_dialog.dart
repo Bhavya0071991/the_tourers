@@ -28,7 +28,7 @@ class CheckoutReceiptDialog extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final discountAmount = subtotal * discountPercentage;
-    final shipping = subtotal > 5000 ? 0.0 : 150.0;
+    final shipping = 0.0;
     final finalTotal = subtotal - discountAmount + shipping;
     final txnId =
         'TXN_2026_${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}';

@@ -30,11 +30,13 @@ serve(async (req) => {
     }
 
     // 3. Parse the Request Payload
+    const payload = await req.json()
     const { 
       shipping_address_id, 
       delivery_method_id, 
-      payment_method 
-    } = await req.json()
+      payment_method,
+      promo_code
+    } = payload
 
     if (!shipping_address_id || !delivery_method_id || !payment_method) {
        throw new Error('Missing required fields')
@@ -116,9 +118,24 @@ serve(async (req) => {
       })
     }
 
-    // 7. Calculate final totals (e.g., 18% GST)
-    const discount = 0 // Apply any promo codes here if needed
-    const gstRate = 0.18
+    // 7. Calculate final totals (GST is included in product price)
+    let discount = 0
+    if (promo_code) {
+      const { data: promo, error: promoError } = await supabaseClient
+        .from('promo_codes')
+        .select('*')
+        .eq('code', promo_code)
+        .eq('is_active', true)
+        .maybeSingle()
+      
+      if (!promoError && promo) {
+        // discount_percentage is a number like 10 (for 10%), 15, etc.
+        const discountPercentage = parseFloat(promo.discount_percentage) / 100.0
+        discount = parseFloat((subtotal * discountPercentage).toFixed(2))
+      }
+    }
+
+    const gstRate = 0.0 // GST is included in product price
     const gst = parseFloat((subtotal * gstRate).toFixed(2))
     const total = parseFloat((subtotal - discount + deliveryCharge + gst).toFixed(2))
 

@@ -51,10 +51,11 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
       heroViewModelProvider.select((state) => state.currentPage),
     );
 
-    // Edge-to-edge full height aesthetic
+    // Mobile: shorter height so landscape banners are fully visible
+    // Desktop: keep the tall immersive hero
     final sectionHeight = isDesktop
         ? screenSize.height * 0.85
-        : screenSize.height * 0.70;
+        : screenSize.width * 0.75; // 4:3 aspect ratio for banners
 
     final bannersAsync = ref.watch(homeBannersProvider);
 
@@ -129,7 +130,7 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                               child: AppImage(
                                 imageUrl: banner.imageUrl,
                                 fit: BoxFit.cover,
-                                alignment: Alignment.topCenter,
+                                alignment: Alignment.center,
                                 memCacheWidth: isDesktop ? 1600 : 800,
                               ),
                             ),
@@ -142,12 +143,12 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
                                 colors: [
-                                  Colors.black.withValues(alpha: 0.9),
-                                  Colors.black.withValues(alpha: 0.4),
+                                  Colors.black.withValues(alpha: 0.85),
+                                  Colors.black.withValues(alpha: 0.3),
                                   Colors.transparent,
                                   Colors.transparent,
                                 ],
-                                stops: const [0.0, 0.4, 0.7, 1.0],
+                                stops: const [0.0, 0.35, 0.6, 1.0],
                               ),
                             ),
                           ),
@@ -160,12 +161,13 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
 
               // 2. Editorial Content Overlay with flutter_animate
               Positioned(
-                left: isDesktop ? 80.0 : 24.0,
-                top: isDesktop ? 80.0 : 64.0,
+                left: isDesktop ? 80.0 : 16.0,
+                bottom: isDesktop ? null : 16.0,
+                top: isDesktop ? 80.0 : null,
                 child: SizedBox(
                   width: isDesktop
                       ? 700
-                      : MediaQuery.of(context).size.width * 0.8,
+                      : MediaQuery.of(context).size.width * 0.7,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
@@ -173,10 +175,12 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                       AppText.bebas(
                             banners[currentPage % banners.length].title,
                             textAlign: TextAlign.left,
-                            fontSize: isDesktop ? 80 : 38,
+                            fontSize: isDesktop ? 80 : 26,
                             height: 0.85,
-                            letterSpacing: isDesktop ? 4.0 : 2.0,
+                            letterSpacing: isDesktop ? 4.0 : 1.5,
                             color: Colors.white,
+                            maxLines: isDesktop ? null : 2,
+                            overflow: isDesktop ? null : TextOverflow.ellipsis,
                             shadows: [
                               Shadow(
                                 color: Colors.black.withValues(alpha: 0.5),
@@ -200,14 +204,16 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                             curve: Curves.easeOutQuart,
                           ),
 
-                      const SizedBox(height: AppSizes.p16),
+                      SizedBox(height: isDesktop ? AppSizes.p16 : AppSizes.p8),
 
                       AppText.spaceMono(
                             banners[currentPage % banners.length].subtitle,
-                            fontSize: isDesktop ? 18 : 11,
+                            fontSize: isDesktop ? 18 : 10,
                             fontWeight: FontWeight.w400,
                             color: Colors.white.withValues(alpha: 0.9),
-                            letterSpacing: isDesktop ? 1.5 : 0.8,
+                            letterSpacing: isDesktop ? 1.5 : 0.5,
+                            maxLines: isDesktop ? null : 2,
+                            overflow: isDesktop ? null : TextOverflow.ellipsis,
                           )
                           .animate(key: ValueKey('subtitle_$currentPage'))
                           .fadeIn(duration: 800.ms, delay: 300.ms)
@@ -217,99 +223,199 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                             duration: 800.ms,
                             curve: Curves.easeOutCubic,
                           ),
+
+                      SizedBox(height: isDesktop ? 0 : AppSizes.p12),
+
+                      // Himachali boy sitting on explore button (mobile only)
+                      if (!isDesktop)
+                        Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            // Explore button
+                            Padding(
+                              padding: const EdgeInsets.only(top: 28.0),
+                              child:
+                                  OutlinedButton(
+                                        onPressed: () {
+                                          final link =
+                                              banners[currentPage %
+                                                      banners.length]
+                                                  .linkTarget;
+                                          if (link != null && link.isNotEmpty) {
+                                            context.go(link);
+                                          } else {
+                                            context.go(
+                                              AppPaths.categoryId('mens'),
+                                            );
+                                          }
+                                        },
+                                        style: ButtonStyle(
+                                          foregroundColor:
+                                              WidgetStateProperty.all(
+                                                Colors.white,
+                                              ),
+                                          backgroundColor:
+                                              WidgetStateProperty.all(
+                                                Colors.transparent,
+                                              ),
+                                          side: WidgetStateProperty.all(
+                                            const BorderSide(
+                                              color: Colors.white,
+                                              width: 1.5,
+                                            ),
+                                          ),
+                                          padding: WidgetStateProperty.all(
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                          ),
+                                          shape: WidgetStateProperty.all(
+                                            const RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.zero,
+                                            ),
+                                          ),
+                                          overlayColor: WidgetStateProperty.all(
+                                            Colors.transparent,
+                                          ),
+                                        ),
+                                        child: AppText.spaceMono(
+                                          AppStrings.exploreBtn.toUpperCase(),
+                                          fontSize: 9,
+                                          fontWeight: FontWeight.bold,
+                                          letterSpacing: 1.5,
+                                        ),
+                                      )
+                                      .animate()
+                                      .fadeIn(duration: 800.ms, delay: 600.ms)
+                                      .scaleXY(
+                                        begin: 0.95,
+                                        end: 1.0,
+                                        duration: 800.ms,
+                                        curve: Curves.easeOutBack,
+                                      ),
+                            ),
+                            // Himachali boy centered above the button
+                            Positioned(
+                              left: 0,
+                              right: 0,
+                              top: -8,
+                              child: Center(
+                                child:
+                                    Image.asset(
+                                          'assets/images/himachali_boy.png',
+                                          height: 38,
+                                          fit: BoxFit.contain,
+                                        )
+                                        .animate(
+                                          onPlay: (controller) =>
+                                              controller.repeat(reverse: true),
+                                        )
+                                        .slideY(
+                                          begin: -0.05,
+                                          end: 0.05,
+                                          duration: 2000.ms,
+                                          curve: Curves.easeInOutSine,
+                                        ),
+                              ),
+                            ),
+                          ],
+                        ),
                     ],
                   ),
                 ),
               ),
 
-              // Floating Character Image (Positioned directly above Explore Button)
-              Positioned(
-                left: isDesktop ? 80.0 : 24.0,
-                bottom: isDesktop ? 150.0 : 130.0,
-                child:
-                    Image.asset(
-                          'assets/images/himachali_boy.png',
-                          height: isDesktop ? 170 : 60,
-                          fit: BoxFit.contain,
-                        )
-                        .animate(
-                          onPlay: (controller) =>
-                              controller.repeat(reverse: true),
-                        )
-                        .slideY(
-                          begin: -0.05,
-                          end: 0.05,
-                          duration: 2000.ms,
-                          curve: Curves.easeInOutSine,
-                        ),
-              ),
+              // Floating Character Image (Desktop – above Explore Button)
+              if (isDesktop)
+                Positioned(
+                  left: 80.0,
+                  bottom: 150.0,
+                  child:
+                      Image.asset(
+                            'assets/images/himachali_boy.png',
+                            height: 170,
+                            fit: BoxFit.contain,
+                          )
+                          .animate(
+                            onPlay: (controller) =>
+                                controller.repeat(reverse: true),
+                          )
+                          .slideY(
+                            begin: -0.05,
+                            end: 0.05,
+                            duration: 2000.ms,
+                            curve: Curves.easeInOutSine,
+                          ),
+                ),
 
-              // 3. Explore Button (Bottom Left)
-              Positioned(
-                left: isDesktop ? 80.0 : 24.0,
-                bottom: isDesktop ? 80.0 : 64.0,
-                child:
-                    OutlinedButton(
-                          onPressed: () {
-                            final link = banners[currentPage % banners.length]
-                                .linkTarget;
-                            if (link != null && link.isNotEmpty) {
-                              context.go(link);
-                            } else {
-                              context.go(AppPaths.categoryId('mens'));
-                            }
-                          },
-                          style: ButtonStyle(
-                            foregroundColor: WidgetStateProperty.resolveWith((
-                              states,
-                            ) {
-                              if (states.contains(WidgetState.hovered)) {
-                                return Colors.black;
+              // 3. Explore Button (Desktop only – mobile button is inline above)
+              if (isDesktop)
+                Positioned(
+                  left: 80.0,
+                  bottom: 80.0,
+                  child:
+                      OutlinedButton(
+                            onPressed: () {
+                              final link = banners[currentPage % banners.length]
+                                  .linkTarget;
+                              if (link != null && link.isNotEmpty) {
+                                context.go(link);
+                              } else {
+                                context.go(AppPaths.categoryId('mens'));
                               }
-                              return Colors.white;
-                            }),
-                            backgroundColor: WidgetStateProperty.resolveWith((
-                              states,
-                            ) {
-                              if (states.contains(WidgetState.hovered)) {
+                            },
+                            style: ButtonStyle(
+                              foregroundColor: WidgetStateProperty.resolveWith((
+                                states,
+                              ) {
+                                if (states.contains(WidgetState.hovered)) {
+                                  return Colors.black;
+                                }
                                 return Colors.white;
-                              }
-                              return Colors.transparent;
-                            }),
-                            side: WidgetStateProperty.all(
-                              const BorderSide(color: Colors.white, width: 2),
-                            ),
-                            padding: WidgetStateProperty.all(
-                              EdgeInsets.symmetric(
-                                horizontal: isDesktop ? 48 : 32,
-                                vertical: isDesktop ? 24 : 16,
+                              }),
+                              backgroundColor: WidgetStateProperty.resolveWith((
+                                states,
+                              ) {
+                                if (states.contains(WidgetState.hovered)) {
+                                  return Colors.white;
+                                }
+                                return Colors.transparent;
+                              }),
+                              side: WidgetStateProperty.all(
+                                const BorderSide(color: Colors.white, width: 2),
+                              ),
+                              padding: WidgetStateProperty.all(
+                                const EdgeInsets.symmetric(
+                                  horizontal: 48,
+                                  vertical: 24,
+                                ),
+                              ),
+                              shape: WidgetStateProperty.all(
+                                const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.zero,
+                                ),
+                              ),
+                              overlayColor: WidgetStateProperty.all(
+                                Colors.transparent,
                               ),
                             ),
-                            shape: WidgetStateProperty.all(
-                              const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero,
-                              ),
+                            child: AppText.spaceMono(
+                              AppStrings.exploreBtn.toUpperCase(),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 2.0,
                             ),
-                            overlayColor: WidgetStateProperty.all(
-                              Colors.transparent,
-                            ),
+                          )
+                          .animate()
+                          .fadeIn(duration: 800.ms, delay: 600.ms)
+                          .scaleXY(
+                            begin: 0.95,
+                            end: 1.0,
+                            duration: 800.ms,
+                            curve: Curves.easeOutBack,
                           ),
-                          child: AppText.spaceMono(
-                            AppStrings.exploreBtn.toUpperCase(),
-                            fontSize: isDesktop ? 16 : 12,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2.0,
-                          ),
-                        )
-                        .animate()
-                        .fadeIn(duration: 800.ms, delay: 600.ms)
-                        .scaleXY(
-                          begin: 0.95,
-                          end: 1.0,
-                          duration: 800.ms,
-                          curve: Curves.easeOutBack,
-                        ),
-              ),
+                ),
 
               // 4. Navigation Arrows (Tablet/Desktop)
               if (screenSize.width >= 768 && banners.length > 1) ...[
@@ -384,36 +490,69 @@ class _HeroSectionState extends ConsumerState<HeroSection> {
                   ),
                 ),
 
-              // 4. Progressive Navigation Indicators
+              // Progressive Navigation Indicators
               Positioned(
-                right: isDesktop ? 80.0 : 24.0,
-                bottom: isDesktop ? 80.0 : 32.0,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: List.generate(banners.length, (index) {
-                    final isActive = currentPage == index;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 400),
-                      margin: const EdgeInsets.only(left: 12),
-                      height: 2,
-                      width: isActive ? 48 : 16,
-                      alignment: Alignment.centerLeft,
-                      color: Colors.white.withValues(alpha: 0.3),
-                      child: isActive
-                          ? TweenAnimationBuilder<double>(
-                              tween: Tween<double>(begin: 0.0, end: 1.0),
-                              duration: const Duration(seconds: 6),
-                              builder: (context, value, child) {
-                                return FractionallySizedBox(
-                                  widthFactor: value,
-                                  child: Container(color: Colors.white),
-                                );
-                              },
-                            )
-                          : const SizedBox(),
-                    );
-                  }),
-                ),
+                left: isDesktop ? null : 0,
+                right: isDesktop ? 80.0 : 0,
+                bottom: isDesktop ? 80.0 : 12.0,
+                child: isDesktop
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: List.generate(banners.length, (index) {
+                          final isActive = currentPage == index;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 400),
+                            margin: const EdgeInsets.only(left: 12),
+                            height: 2,
+                            width: isActive ? 48 : 16,
+                            alignment: Alignment.centerLeft,
+                            color: Colors.white.withValues(alpha: 0.3),
+                            child: isActive
+                                ? TweenAnimationBuilder<double>(
+                                    tween: Tween<double>(begin: 0.0, end: 1.0),
+                                    duration: const Duration(seconds: 6),
+                                    builder: (context, value, child) {
+                                      return FractionallySizedBox(
+                                        widthFactor: value,
+                                        child: Container(color: Colors.white),
+                                      );
+                                    },
+                                  )
+                                : const SizedBox(),
+                          );
+                        }),
+                      )
+                    : Center(
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(banners.length, (index) {
+                            final isActive = currentPage == index;
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 400),
+                              margin: const EdgeInsets.symmetric(horizontal: 4),
+                              height: 2,
+                              width: isActive ? 32 : 12,
+                              alignment: Alignment.centerLeft,
+                              color: Colors.white.withValues(alpha: 0.3),
+                              child: isActive
+                                  ? TweenAnimationBuilder<double>(
+                                      tween: Tween<double>(
+                                        begin: 0.0,
+                                        end: 1.0,
+                                      ),
+                                      duration: const Duration(seconds: 6),
+                                      builder: (context, value, child) {
+                                        return FractionallySizedBox(
+                                          widthFactor: value,
+                                          child: Container(color: Colors.white),
+                                        );
+                                      },
+                                    )
+                                  : const SizedBox(),
+                            );
+                          }),
+                        ),
+                      ),
               ),
             ],
           );

@@ -66,7 +66,7 @@ class _FooterSectionState extends State<FooterSection>
           WebConstrainedBox(
             padding: EdgeInsets.symmetric(
               horizontal: isDesktop ? 64.0 : 24.0,
-              vertical: 80.0,
+              vertical: isDesktop ? 80.0 : 40.0,
             ),
             child: isDesktop
                 ? Row(
@@ -132,7 +132,7 @@ class _FooterSectionState extends State<FooterSection>
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       _buildLogoColumn(context, textColor, fadedTextColor),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 28),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -159,14 +159,14 @@ class _FooterSectionState extends State<FooterSection>
                           ),
                         ],
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 20),
                       _buildLinkColumn(
                         AppStrings.footerColFollow,
                         ['INSTAGRAM', 'DESIGNER INSTAGRAM'],
                         textColor,
                         fadedTextColor,
                       ),
-                      const SizedBox(height: 48),
+                      const SizedBox(height: 28),
                       _buildNewsletterColumn(
                         context,
                         textColor,
@@ -263,7 +263,7 @@ class _FooterSectionState extends State<FooterSection>
             ),
           ],
         ),
-        const SizedBox(height: 64),
+        SizedBox(height: isDesktop ? 64 : 24),
         AppText.spaceMono(
           AppStrings.footerCopyright,
           color: fadedTextColor,
@@ -291,16 +291,16 @@ class _FooterSectionState extends State<FooterSection>
           fontSize: isDesktop ? 14 : 11,
           fontWeight: FontWeight.w700,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: isDesktop ? 16 : 10),
         Container(
           width: 40,
           height: 1,
           color: fadedTextColor.withValues(alpha: 0.3),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: isDesktop ? 24 : 14),
         ...links.map(
           (link) => Padding(
-            padding: const EdgeInsets.only(bottom: 16.0),
+            padding: EdgeInsets.only(bottom: isDesktop ? 16.0 : 10.0),
             child: InkWell(
               onTap: () async {
                 if (link == AppStrings.navNewArrival) {
@@ -383,14 +383,14 @@ class _FooterSectionState extends State<FooterSection>
             fontSize: isDesktop ? 40 : 28,
             letterSpacing: 1.5,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: isDesktop ? 16 : 10),
           AppText.spaceMono(
             AppStrings.footerNewsletterDesc,
             color: textColor.withValues(alpha: 0.8),
             fontSize: isDesktop ? 14 : 11,
             height: 1.6,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: isDesktop ? 24 : 16),
           Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [

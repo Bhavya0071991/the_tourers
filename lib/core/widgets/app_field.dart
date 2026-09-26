@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppField extends StatefulWidget {
@@ -8,6 +9,7 @@ class AppField extends StatefulWidget {
   final bool obscureText;
   final Widget? suffixIcon;
   final ValueChanged<String>? onChanged;
+  final List<TextInputFormatter>? inputFormatters;
 
   const AppField({
     super.key,
@@ -17,6 +19,7 @@ class AppField extends StatefulWidget {
     this.obscureText = false,
     this.suffixIcon,
     this.onChanged,
+    this.inputFormatters,
   });
 
   @override
@@ -74,6 +77,7 @@ class _AppFieldState extends State<AppField> {
         keyboardType: widget.keyboardType,
         obscureText: _isObscured,
         onChanged: widget.onChanged,
+        inputFormatters: widget.inputFormatters,
         style: GoogleFonts.spaceMono(
           color: primaryColor,
           fontSize: 14,

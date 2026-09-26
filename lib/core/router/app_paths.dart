@@ -22,6 +22,7 @@ class AppPaths {
   static const String adminOrders = '/admin/orders';
   static const String adminProducts = '/admin/products';
   static const String adminBanners = '/admin/banners';
+  static const String adminPromos = '/admin/promos';
   static const String adminMarquee = '/admin/marquee';
   static const String adminCollections = '/admin/collections';
   static const String adminAddProduct = '/admin/products/add';

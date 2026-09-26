@@ -101,7 +101,7 @@ class CategoryPage extends ConsumerWidget {
                           // Giant Header Title
                           AppText.bebas(
                             categoryTitle,
-                            fontSize: isDesktop ? 96 : 42,
+                            fontSize: isDesktop ? 96 : 28,
                             height: 0.9,
                             letterSpacing: 4.0,
                             color: Theme.of(context).colorScheme.onSurface,

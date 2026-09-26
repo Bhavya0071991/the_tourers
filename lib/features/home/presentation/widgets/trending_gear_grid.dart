@@ -45,14 +45,14 @@ class _TrendingGearGridState extends ConsumerState<TrendingGearGrid> {
         children: [
           AppText.bebas(
             AppStrings.latestCollection,
-            fontSize: screenWidth > 900 ? 64 : 42,
+            fontSize: screenWidth > 900 ? 64 : 28,
             letterSpacing: 2.0,
             color: Theme.of(context).colorScheme.onSurface,
           ),
 
           // Divider Line
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24.0),
+            padding: const EdgeInsets.symmetric(vertical: 15.0),
             child: Divider(
               color: Theme.of(
                 context,

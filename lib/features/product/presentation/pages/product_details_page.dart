@@ -100,6 +100,57 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  // Back navigation breadcrumb
+                  WebConstrainedBox(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isDesktop ? 64.0 : 24.0,
+                      vertical: isDesktop ? 16.0 : 12.0,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: InkWell(
+                        onTap: () {
+                          if (Navigator.of(context).canPop()) {
+                            context.pop();
+                          } else {
+                            // Fallback: go to the product's category or home
+                            final gender = product.gender.toLowerCase();
+                            if (gender == 'mens' || gender == 'womens') {
+                              context.go(AppPaths.categoryId(gender));
+                            } else {
+                              context.go(AppPaths.home);
+                            }
+                          }
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4.0),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.arrow_back,
+                                size: isDesktop ? 18 : 14,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                              const SizedBox(width: 8),
+                              AppText.spaceMono(
+                                'BACK',
+                                fontSize: isDesktop ? 12 : 10,
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: 1.5,
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurface.withValues(alpha: 0.6),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                   Consumer(
                     builder: (context, ref, _) {
                       final state = ref.watch(productDetailsProvider);
@@ -133,7 +184,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
           children: [
             // Left Side: Massive Image with print overlay
             Expanded(
-              flex: 5,
+              flex: 4,
               child: _buildProductImageWithOverlay(
                 context,
                 product,
@@ -143,7 +194,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             ),
             // Right Side: Brutalist Product Info
             Expanded(
-              flex: 4,
+              flex: 5,
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 64.0,
@@ -299,7 +350,11 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                       ),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.close, color: Colors.white, size: 32),
+                      icon: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 32,
+                      ),
                       onPressed: () => Navigator.of(context).pop(),
                     ),
                   ],
@@ -400,7 +455,9 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                     decoration: BoxDecoration(
                       color: state.currentMediaIndex == index
                           ? AppTheme.neonAccent
-                          : context.colorScheme.onSurface.withValues(alpha: 0.3),
+                          : context.colorScheme.onSurface.withValues(
+                              alpha: 0.3,
+                            ),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -408,57 +465,57 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
               ),
             ),
           if (state.currentMediaIndex > 0)
-              Positioned(
-                left: 16,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      shape: BoxShape.circle,
+            Positioned(
+              left: 16,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_back_ios_new,
+                      color: Colors.white,
                     ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_back_ios_new,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        _pageController.previousPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                    ),
+                    onPressed: () {
+                      _pageController.previousPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
                   ),
                 ),
               ),
-            if (state.currentMediaIndex < mediaList.length - 1)
-              Positioned(
-                right: 16,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
-                      shape: BoxShape.circle,
+            ),
+          if (state.currentMediaIndex < mediaList.length - 1)
+            Positioned(
+              right: 16,
+              top: 0,
+              bottom: 0,
+              child: Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.3),
+                    shape: BoxShape.circle,
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.arrow_forward_ios,
+                      color: Colors.white,
                     ),
-                    child: IconButton(
-                      icon: const Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.white,
-                      ),
-                      onPressed: () {
-                        _pageController.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      },
-                    ),
+                    onPressed: () {
+                      _pageController.nextPage(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
                   ),
                 ),
               ),
+            ),
         ],
       ),
     );
@@ -479,17 +536,18 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
               itemBuilder: (context, index) {
                 final media = mediaList[index];
                 final isSelected = state.currentMediaIndex == index;
-                
+
                 String? mockupAsset;
                 if (index == 0 && product.mockup != null) {
                   if (state.availableColors.containsKey(state.selectedColor) &&
                       state.availableColors[state.selectedColor]!.isNotEmpty) {
-                    mockupAsset = state.availableColors[state.selectedColor]!.first;
+                    mockupAsset =
+                        state.availableColors[state.selectedColor]!.first;
                   } else {
                     mockupAsset = media['url'];
                   }
                 }
-                
+
                 return GestureDetector(
                   onTap: () {
                     _pageController.animateToPage(
@@ -503,14 +561,19 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                     margin: const EdgeInsets.symmetric(horizontal: 6),
                     decoration: BoxDecoration(
                       border: Border.all(
-                        color: isSelected ? AppTheme.neonAccent : Colors.transparent,
+                        color: isSelected
+                            ? AppTheme.neonAccent
+                            : Colors.transparent,
                         width: 2,
                       ),
                       color: context.colorScheme.surfaceContainerHighest,
                     ),
                     child: media['type'] == 'video'
                         ? const Center(
-                            child: Icon(Icons.play_circle_outline, color: Colors.black54),
+                            child: Icon(
+                              Icons.play_circle_outline,
+                              color: Colors.black54,
+                            ),
                           )
                         : MockupImageWidget(
                             image: media['url']!,
@@ -544,7 +607,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
             Expanded(
               child: AppText.bebas(
                 product.name.toUpperCase(),
-                fontSize: isDesktop ? 72 : 32,
+                fontSize: isDesktop ? 56 : 28,
                 height: 0.9,
                 color: context.colorScheme.onSurface,
               ),
@@ -808,7 +871,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
           subtitle: 'Manufacture, Care and Fit',
           leadingIcon: Icons.description_outlined,
           initiallyExpanded: true,
-          child: _buildProductDescriptionContent(context),
+          child: _buildProductDescriptionContent(context, state),
         ),
         _buildExpandableSection(
           context,
@@ -1229,21 +1292,13 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildTrustItem(
-            context,
-            Icons.payments_outlined,
-            'CASH ON\nDELIVERY',
-          ),
+          _buildTrustItem(context, Icons.verified_outlined, 'PREMIUM\nQUALITY'),
           _buildTrustItem(
             context,
             Icons.local_shipping_outlined,
             'FREE SHIPPING\nON ALL ORDERS',
           ),
-          _buildTrustItem(
-            context,
-            Icons.swap_horizontal_circle_outlined,
-            'EASY\nRETURNS',
-          ),
+          _buildTrustItem(context, Icons.lock_outline, 'SECURE\nCHECKOUT'),
         ],
       ),
     );
@@ -1320,19 +1375,28 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
     );
   }
 
-  Widget _buildProductDescriptionContent(BuildContext context) {
+  Widget _buildProductDescriptionContent(
+    BuildContext context,
+    ProductDetailsState state,
+  ) {
     return Column(
       children: [
         _buildInfoRow(context, 'Made of', 'Textured'),
         _buildInfoRow(context, 'Neck Type', 'Round Neck'),
         _buildInfoRow(context, 'Fit Type', 'Oversized Fit'),
-        _buildInfoRow(context, 'Color', 'Green'),
-        _buildInfoRow(context, 'Pattern', 'Textured'),
+        _buildInfoRow(
+          context,
+          'Color',
+          state.selectedColor.isNotEmpty ? state.selectedColor : 'N/A',
+        ),
         _buildInfoRow(context, 'Sleeve Type', 'Half Sleeve'),
-        _buildInfoRow(context, 'Care Instructions', 'Machine washable'),
-        _buildInfoRow(context, 'Available Sizes', 'S, M, L, XL, XXL'),
-
-        _buildInfoRow(context, 'GSM', '220'),
+        _buildInfoRow(
+          context,
+          'Care Instructions',
+          'Wash inside-out in cold water',
+        ),
+        //_buildInfoRow(context, 'Available Sizes', 'S, M, L, XL, XXL'),
+        _buildInfoRow(context, 'GSM', '240'),
         _buildInfoRow(context, 'Country of origin', 'India'),
       ],
     );
@@ -1376,23 +1440,27 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
         children: [
           _buildTextContent(
             context,
-            'Shipping Info',
-            'We offer free shipping across India',
+            AppStrings.productShippingInfoTitle,
+            AppStrings.productShippingInfoBody,
           ),
           const SizedBox(height: 16),
           _buildTextContent(
             context,
-            '1-2 Days Dispatch',
-            'We dispatch orders within 1-2 days.',
+            AppStrings.productDispatchTitle,
+            AppStrings.productDispatchBody,
           ),
           const SizedBox(height: 16),
           _buildTextContent(
             context,
-            '2-5 Days Delivery',
-            'We usually take 2-5 working days depending on your location.\nMetros 2-3 days\nRest of India 3-5 days',
+            AppStrings.productDeliveryTitle,
+            AppStrings.productDeliveryBody,
           ),
           const SizedBox(height: 16),
-          _buildTextContent(context, 'Customer Support', '99999 22222'),
+          _buildTextContent(
+            context,
+            AppStrings.productSupportTitle,
+            AppStrings.productSupportEmail,
+          ),
         ],
       ),
     );
@@ -1405,7 +1473,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppText.spaceMono(
-            'Items purchased from The Tourers are eligible for return/exchange, if returned within 7 days of delivery.',
+            AppStrings.productReturnsGeneral,
             fontSize: 13,
             color: context.colorScheme.onSurface.withValues(alpha: 0.7),
             height: 1.5,
@@ -1413,20 +1481,20 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
           const SizedBox(height: 16),
           _buildTextContent(
             context,
-            'Free Exchanges',
-            'We accept exchanges free of cost. This means you wont be charged extra to exchange the product(s). It\'s on us! We want your experience to be hassle-free.',
+            AppStrings.productDefectTitle,
+            AppStrings.productDefectBody,
           ),
           const SizedBox(height: 16),
           _buildTextContent(
             context,
-            'Easy Returns',
-            'For Prepaid Orders - The full amount is refunded into your initial payment mode (bank account, credit card, etc.)\n\nFor Cash on Delivery Orders - The order amount will be refunded to your bank account. You can provide your bank/upi detail. COD charges are non-refundable.',
+            AppStrings.productEvidenceTitle,
+            AppStrings.productEvidenceBody,
           ),
           const SizedBox(height: 16),
           _buildTextContent(
             context,
-            'Exchange For Something Else?',
-            'In case of an exchange, you are also allowed to choose a different product. If the value of the replacement product exceeds that of the previously purchased product, you can pay just the difference else if it\'s less, the same can be refunded to you as gift card.',
+            AppStrings.productRtoTitle,
+            AppStrings.productRtoBody,
           ),
         ],
       ),
@@ -1484,7 +1552,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                     ),
                     child: Center(
                       child: AppText.spaceMono(
-                        'Be the first to review this product.\nYou can leave a review from the "My Orders" page after purchasing.',
+                        AppStrings.productNoReviews,
                         fontSize: 12,
                         color: context.colorScheme.onSurface.withValues(
                           alpha: 0.6,

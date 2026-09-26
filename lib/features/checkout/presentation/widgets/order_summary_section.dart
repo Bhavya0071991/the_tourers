@@ -8,6 +8,7 @@ class OrderSummarySection extends StatelessWidget {
   final double gst;
   final double total;
   final double discountPercentage;
+  final bool showGst;
 
   const OrderSummarySection({
     super.key,
@@ -17,6 +18,7 @@ class OrderSummarySection extends StatelessWidget {
     required this.gst,
     required this.total,
     this.discountPercentage = 0.0,
+    this.showGst = true,
   });
 
   @override
@@ -63,8 +65,10 @@ class OrderSummarySection extends StatelessWidget {
           ),
           const SizedBox(height: 8),
 
-          _row('GST (18%)', '₹${gst.toStringAsFixed(0)}', textColor),
-          const SizedBox(height: 12),
+          if (showGst) ...[
+            _row('GST (18%)', '₹${gst.toStringAsFixed(0)}', textColor),
+            const SizedBox(height: 12),
+          ],
 
           Divider(color: textColor, thickness: 2),
           const SizedBox(height: 12),

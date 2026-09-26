@@ -1,6 +1,7 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import '../../../../core/widgets/app_field_labeled.dart';
 import '../../../../core/widgets/app_text.dart';
@@ -43,10 +44,67 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
     _stateController = TextEditingController(text: a?.state ?? '');
     _pincodeController = TextEditingController(text: a?.pincode ?? '');
     _isDefault = a?.isDefault ?? false;
+
+    _pincodeController.addListener(_onPincodeChanged);
+  }
+
+  bool _isFetchingLocation = false;
+  String? _inlineMessage;
+  bool _isInlineError = false;
+
+  void _showInlineMessage(String message, {bool isError = false}) {
+    if (!mounted) return;
+    setState(() {
+      _inlineMessage = message;
+      _isInlineError = isError;
+    });
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted && _inlineMessage == message) {
+        setState(() => _inlineMessage = null);
+      }
+    });
+  }
+
+  Future<void> _onPincodeChanged() async {
+    final text = _pincodeController.text;
+    // Only fetch if it's exactly 6 digits and we aren't already fetching
+    if (text.length == 6 && !_isFetchingLocation) {
+      setState(() => _isFetchingLocation = true);
+
+      try {
+        final response = await http.get(
+          Uri.parse('https://api.postalpincode.in/pincode/$text'),
+        );
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          if (data.isNotEmpty && data[0]['Status'] == 'Success') {
+            final postOffice = data[0]['PostOffice'][0];
+
+            // The API returns District/Block and State
+            final district =
+                postOffice['District'] ?? postOffice['Block'] ?? '';
+            final state = postOffice['State'] ?? '';
+
+            if (mounted) {
+              setState(() {
+                _cityController.text = district;
+                _stateController.text = state;
+              });
+              _showInlineMessage('LOCATION AUTO-FILLED SUCESSFULLY');
+            }
+          }
+        }
+      } catch (e) {
+        // If it fails, fail silently and let user type manually
+      } finally {
+        if (mounted) setState(() => _isFetchingLocation = false);
+      }
+    }
   }
 
   @override
   void dispose() {
+    _pincodeController.removeListener(_onPincodeChanged);
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
@@ -64,20 +122,13 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
         _cityController.text.trim().isEmpty ||
         _stateController.text.trim().isEmpty ||
         _pincodeController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'ALL REQUIRED FIELDS MUST BE FILLED',
-            style: GoogleFonts.spaceMono(fontWeight: FontWeight.bold),
-          ),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
+      _showInlineMessage('ALL REQUIRED FIELDS MUST BE FILLED', isError: true);
       return;
     }
 
     final address = Address(
-      id: widget.existingAddress?.id ??
+      id:
+          widget.existingAddress?.id ??
           'addr_${const Uuid().v4().substring(0, 8)}',
       fullName: _nameController.text.trim().toUpperCase(),
       phone: _phoneController.text.trim(),
@@ -180,6 +231,39 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
               const SizedBox(height: 16),
 
               Row(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Expanded(
+                    child: AppFieldLabeled(
+                      label: 'Pincode *',
+                      hintText: '560034',
+                      controller: _pincodeController,
+                      keyboardType: TextInputType.number,
+                      maxLength: 6,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      prefixIcon: const Icon(Icons.pin_outlined),
+                    ),
+                  ),
+                  if (_isFetchingLocation)
+                    Padding(
+                      padding: const EdgeInsets.only(
+                        left: 16,
+                        bottom: 24,
+                      ), // Align with input
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              Row(
                 children: [
                   Expanded(
                     child: AppFieldLabeled(
@@ -198,18 +282,28 @@ class _AddressFormSheetState extends State<AddressFormSheet> {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-
-              AppFieldLabeled(
-                label: 'Pincode *',
-                hintText: '560034',
-                controller: _pincodeController,
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                prefixIcon: const Icon(Icons.pin_outlined),
-              ),
               const SizedBox(height: 20),
+
+              // Inline Message Display
+              if (_inlineMessage != null)
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: _isInlineError
+                        ? Colors.redAccent
+                        : Colors.greenAccent,
+                    border: Border.all(color: textColor, width: 2),
+                  ),
+                  child: AppText.spaceMono(
+                    _inlineMessage!,
+                    color: _isInlineError ? Colors.white : Colors.black,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 12,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
 
               // Default toggle
               GestureDetector(

@@ -577,7 +577,7 @@ class CustomAppBar extends ConsumerWidget {
                           duration: 800.ms,
                           color: AppTheme.neonAccent.withValues(alpha: 0.5),
                         ),
-                    if (subtitle != null) subtitle,
+                    ?subtitle,
                   ],
                 ),
               ),

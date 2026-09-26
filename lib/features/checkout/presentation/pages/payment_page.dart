@@ -137,43 +137,36 @@ class _PaymentPageState extends ConsumerState<PaymentPage>
             discount: discount,
             gst: gst,
             total: total,
+            promoCode: checkout.promoCode,
           );
 
       final orderId = result['order_id']!;
       final rzpOrderId = result['razorpay_order_id'];
       _currentOrderId = orderId;
 
-      if (_selectedMethod == 'Cash on Delivery') {
-        if (!mounted) return;
-        ref.read(lastPlacedOrderIdProvider.notifier).set(orderId);
-        ref.read(cartProvider.notifier).clearCart();
-        ref.read(checkoutProvider.notifier).reset();
-        context.go(AppPaths.orderSuccess);
-      } else {
-        final user = ref.read(authProvider).value;
-        final razorpayKeyId = dotenv.env['RAZORPAY_KEY'] ??
-            const String.fromEnvironment('RAZORPAY_KEY', defaultValue: '');
+      final user = ref.read(authProvider).value;
+      final razorpayKeyId = dotenv.env['RAZORPAY_KEY'] ??
+          const String.fromEnvironment('RAZORPAY_KEY', defaultValue: '');
 
-        var options = {
-          'key': razorpayKeyId,
-          'amount': (total * 100).toInt(),
-          'name': 'The Tourers',
-          'order_id': rzpOrderId,
-          'description': 'Order $orderId',
-          'prefill': {
-            'contact': checkout.selectedAddress?.phone ?? '',
-            'email': user?.email ?? '',
-          },
-          'theme': {'color': '#000000'},
-        };
+      var options = {
+        'key': razorpayKeyId,
+        'amount': (total * 100).toInt(),
+        'name': 'The Tourers',
+        'order_id': rzpOrderId,
+        'description': 'Order $orderId',
+        'prefill': {
+          'contact': checkout.selectedAddress?.phone ?? '',
+          'email': user?.email ?? '',
+        },
+        'theme': {'color': '#000000'},
+      };
 
-        _razorpay.open(options);
-        // Update text while Razorpay overlay is open
-        if (mounted) {
-          setState(() {
-            _processingStatus = 'AWAITING PAYMENT GATEWAY...';
-          });
-        }
+      _razorpay.open(options);
+      // Update text while Razorpay overlay is open
+      if (mounted) {
+        setState(() {
+          _processingStatus = 'AWAITING PAYMENT GATEWAY...';
+        });
       }
     } catch (e) {
       if (mounted) {
@@ -279,54 +272,82 @@ class _PaymentPageState extends ConsumerState<PaymentPage>
                           onTap: () =>
                               setState(() => _selectedMethod = 'Pay Online'),
                         ),
-                        PaymentMethodCard(
-                          title: 'CASH ON DELIVERY',
-                          subtitle: 'Pay when you receive',
-                          icon: Icons.payments_outlined,
-                          isSelected: _selectedMethod == 'Cash on Delivery',
-                          onTap: () => setState(
-                            () => _selectedMethod = 'Cash on Delivery',
-                          ),
-                        ),
+
 
                         const SizedBox(height: 32),
 
                         // Delivery info summary
                         if (checkout.selectedAddress != null)
                           Container(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(20),
                             margin: const EdgeInsets.only(bottom: 16),
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: textColor.withValues(alpha: 0.12),
-                                width: 1.5,
-                              ),
+                              color: surfaceColor,
+                              border: Border.all(color: textColor, width: 3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: textColor.withValues(alpha: 0.1),
+                                  offset: const Offset(6, 6),
+                                  blurRadius: 0,
+                                ),
+                              ],
                             ),
-                            child: Column(
+                            child: Row(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                AppText.spaceMono(
-                                  '/// SHIPPING TO:',
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor.withValues(alpha: 0.4),
-                                ),
-                                const SizedBox(height: 8),
-                                AppText.spaceMono(
-                                  checkout.selectedAddress!.formattedAddress,
-                                  fontSize: 11,
-                                  color: textColor.withValues(alpha: 0.7),
-                                  height: 1.5,
-                                ),
-                                if (checkout.selectedDelivery != null) ...[
-                                  const SizedBox(height: 8),
-                                  AppText.spaceMono(
-                                    '${checkout.selectedDelivery!.title} — ${checkout.selectedDelivery!.estimatedDays}',
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: textColor.withValues(alpha: 0.5),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.neonAccent,
+                                    border: Border.all(color: textColor, width: 2),
                                   ),
-                                ],
+                                  child: Icon(
+                                    Icons.location_on,
+                                    size: 24,
+                                    color: AppTheme.pureBlack,
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      AppText.spaceMono(
+                                        '/// SHIPPING TO',
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor.withValues(alpha: 0.5),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      AppText.spaceMono(
+                                        checkout.selectedAddress!.fullName.toUpperCase(),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
+                                      ),
+                                      const SizedBox(height: 4),
+                                      AppText.spaceMono(
+                                        checkout.selectedAddress!.formattedAddress,
+                                        fontSize: 12,
+                                        color: textColor.withValues(alpha: 0.8),
+                                        height: 1.5,
+                                      ),
+                                      if (checkout.selectedDelivery != null) ...[
+                                        const SizedBox(height: 8),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                          color: textColor.withValues(alpha: 0.1),
+                                          child: AppText.spaceMono(
+                                            '${checkout.selectedDelivery!.title} — ${checkout.selectedDelivery!.estimatedDays}',
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                            color: textColor.withValues(alpha: 0.8),
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -405,9 +426,7 @@ class _PaymentPageState extends ConsumerState<PaymentPage>
                               const Icon(Icons.lock, size: 16),
                               const SizedBox(width: 8),
                               AppText.bebas(
-                                _selectedMethod == 'Cash on Delivery'
-                                    ? 'PLACE ORDER ↗'
-                                    : 'PAY NOW ↗',
+                                'PAY NOW ↗',
                                 fontSize: 18,
                                 letterSpacing: 1.5,
                               ),

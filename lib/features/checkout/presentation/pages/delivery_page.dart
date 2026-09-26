@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/router/app_paths.dart';
-
+import '../../../../core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/widgets/app_text.dart';
@@ -8,6 +8,7 @@ import '../../../../core/widgets/checkout_step_indicator.dart';
 import '../../../../core/widgets/brutalist_hover_widget.dart';
 import '../../providers/delivery_provider.dart';
 import '../../providers/checkout_provider.dart';
+import '../../models/delivery_method.dart';
 import '../widgets/delivery_option_card.dart';
 import '../widgets/order_summary_section.dart';
 
@@ -90,47 +91,87 @@ class DeliveryPage extends ConsumerWidget {
                         // Delivery to info
                         if (checkout.selectedAddress != null) ...[
                           Container(
-                            padding: const EdgeInsets.all(16),
+                            padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              border: Border.all(
-                                color: textColor.withValues(alpha: 0.15),
-                                width: 1.5,
-                              ),
+                              color: surfaceColor,
+                              border: Border.all(color: textColor, width: 3),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: textColor.withValues(alpha: 0.1),
+                                  offset: const Offset(6, 6),
+                                  blurRadius: 0,
+                                ),
+                              ],
                             ),
                             child: Row(
                               children: [
-                                Icon(
-                                  Icons.location_on,
-                                  size: 18,
-                                  color: textColor.withValues(alpha: 0.5),
+                                Container(
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppTheme.neonAccent,
+                                    border: Border.all(
+                                      color: textColor,
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.location_on,
+                                    size: 24,
+                                    color: AppTheme.pureBlack,
+                                  ),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 16),
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       AppText.spaceMono(
-                                        'DELIVERING TO:',
-                                        fontSize: 9,
+                                        '/// DESTINATION COORDINATES',
+                                        fontSize: 10,
                                         fontWeight: FontWeight.bold,
-                                        color: textColor.withValues(alpha: 0.4),
+                                        color: textColor.withValues(alpha: 0.5),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      AppText.spaceMono(
+                                        checkout.selectedAddress!.fullName
+                                            .toUpperCase(),
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: textColor,
                                       ),
                                       const SizedBox(height: 4),
                                       AppText.spaceMono(
-                                        '${checkout.selectedAddress!.fullName} — ${checkout.selectedAddress!.shortAddress}',
-                                        fontSize: 11,
-                                        color: textColor,
+                                        checkout
+                                            .selectedAddress!
+                                            .formattedAddress,
+                                        fontSize: 12,
+                                        color: textColor.withValues(alpha: 0.8),
                                       ),
                                     ],
                                   ),
                                 ),
-                                GestureDetector(
+                                const SizedBox(width: 16),
+                                InkWell(
                                   onTap: () => context.pop(),
-                                  child: AppText.spaceMono(
-                                    'CHANGE',
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.redAccent,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: textColor,
+                                      border: Border.all(
+                                        color: textColor,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: AppText.spaceMono(
+                                      'EDIT',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: surfaceColor,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -143,23 +184,35 @@ class DeliveryPage extends ConsumerWidget {
                         deliveryMethodsAsync.when(
                           data: (methods) {
                             return Column(
-                              children: methods.where((m) => m.isAvailable).map((method) {
-                                return DeliveryOptionCard(
-                                  method: method,
-                                  isSelected: selectedDelivery?.type == method.type,
-                                  onTap: () {
-                                    ref.read(selectedDeliveryProvider.notifier).select(method);
-                                    ref.read(checkoutProvider.notifier).setDelivery(method);
-                                  },
-                                );
-                              }).toList(),
+                              children: methods
+                                  .where(
+                                    (m) =>
+                                        m.isAvailable &&
+                                        m.type == DeliveryType.standard,
+                                  )
+                                  .map((method) {
+                                    return DeliveryOptionCard(
+                                      method: method,
+                                      isSelected:
+                                          selectedDelivery?.type == method.type,
+                                      onTap: () {
+                                        ref
+                                            .read(
+                                              selectedDeliveryProvider.notifier,
+                                            )
+                                            .select(method);
+                                        ref
+                                            .read(checkoutProvider.notifier)
+                                            .setDelivery(method);
+                                      },
+                                    );
+                                  })
+                                  .toList(),
                             );
                           },
                           loading: () => const Padding(
                             padding: EdgeInsets.all(48.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
+                            child: Center(child: CircularProgressIndicator()),
                           ),
                           error: (err, stack) => Padding(
                             padding: const EdgeInsets.all(32.0),
@@ -182,6 +235,7 @@ class DeliveryPage extends ConsumerWidget {
                           gst: gst,
                           total: total,
                           discountPercentage: checkout.discountPercentage,
+                          showGst: false,
                         ),
 
                         const SizedBox(height: 48),
@@ -197,9 +251,7 @@ class DeliveryPage extends ConsumerWidget {
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
                 color: surfaceColor,
-                border: Border(
-                  top: BorderSide(color: textColor, width: 2),
-                ),
+                border: Border(top: BorderSide(color: textColor, width: 2)),
               ),
               child: SafeArea(
                 top: false,
@@ -211,14 +263,18 @@ class DeliveryPage extends ConsumerWidget {
                     child: ElevatedButton(
                       onPressed: selectedDelivery != null
                           ? () {
-                              ref.read(checkoutProvider.notifier).setDelivery(selectedDelivery);
+                              ref
+                                  .read(checkoutProvider.notifier)
+                                  .setDelivery(selectedDelivery);
                               context.push(AppPaths.checkoutPayment);
                             }
                           : null,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: textColor,
                         foregroundColor: surfaceColor,
-                        disabledBackgroundColor: textColor.withValues(alpha: 0.2),
+                        disabledBackgroundColor: textColor.withValues(
+                          alpha: 0.2,
+                        ),
                         padding: const EdgeInsets.symmetric(vertical: 18),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(0),

@@ -38,9 +38,26 @@ class _CartPageState extends ConsumerState<CartPage> {
     super.dispose();
   }
 
-  void _applyPromoCode() {
-    final result = ref.read(cartViewModelProvider.notifier).applyPromoCode(_promoController.text);
-    AppSnackBar.show(context, result);
+  bool _isApplyingPromo = false;
+
+  Future<void> _applyPromoCode() async {
+    if (_promoController.text.trim().isEmpty) return;
+    
+    setState(() {
+      _isApplyingPromo = true;
+    });
+
+    final result = await ref
+        .read(cartViewModelProvider.notifier)
+        .applyPromoCode(_promoController.text);
+        
+    setState(() {
+      _isApplyingPromo = false;
+    });
+    
+    if (mounted) {
+      AppSnackBar.show(context, result);
+    }
   }
 
   void _removePromoCode() {
@@ -63,7 +80,8 @@ class _CartPageState extends ConsumerState<CartPage> {
 
     // Store discount in checkout provider for the payment flow
     if (discountPercentage > 0) {
-      ref.read(checkoutProvider.notifier).setDiscount(discountPercentage);
+      final code = ref.read(cartViewModelProvider).appliedPromoCode;
+      ref.read(checkoutProvider.notifier).setDiscount(discountPercentage, code);
     }
 
     // Navigate to multi-step checkout
@@ -84,7 +102,7 @@ class _CartPageState extends ConsumerState<CartPage> {
 
     // Pricing formulas
     final discountAmount = subtotal * cartViewState.discountPercentage;
-    final shipping = subtotal > 5000 || subtotal == 0 ? 0.0 : 150.0;
+    final shipping = 0.0;
     final total = subtotal - discountAmount + shipping;
 
     return Scaffold(
@@ -656,11 +674,20 @@ class _CartPageState extends ConsumerState<CartPage> {
                             border: Border.all(color: textColor, width: 2.0),
                           ),
                           alignment: Alignment.center,
-                          child: AppText.bebas(
-                            'APPLY',
-                            fontSize: isDesktop ? 14 : 12,
-                            color: surfaceColor,
-                          ),
+                          child: _isApplyingPromo
+                              ? SizedBox(
+                                  width: 14,
+                                  height: 14,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: surfaceColor,
+                                  ),
+                                )
+                              : AppText.bebas(
+                                  'APPLY',
+                                  fontSize: isDesktop ? 14 : 12,
+                                  color: surfaceColor,
+                                ),
                         ),
                       ),
                     ),
