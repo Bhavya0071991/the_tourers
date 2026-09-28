@@ -10,6 +10,7 @@ import '../../../../core/widgets/app_snackbar.dart';
 import '../../../../core/widgets/brutalist_hover_widget.dart';
 import '../../../../core/widgets/web_constrained_box.dart';
 import '../../../../features/auth/providers/auth_provider.dart';
+
 class AdminLoginPage extends ConsumerStatefulWidget {
   const AdminLoginPage({super.key});
 
@@ -33,20 +34,27 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
     final password = _passwordController.text;
 
     if (email.isNotEmpty && password.isNotEmpty) {
-      final errorMsg = await ref.read(authProvider.notifier).login(email, password);
-      
+      final errorMsg = await ref
+          .read(authProvider.notifier)
+          .login(email, password);
+
       if (!mounted) return;
 
       if (errorMsg == null) {
         // Fetch current state to check role
         final authState = ref.read(authProvider).value;
-        if (authState != null && (authState.role == 'admin' || authState.role == 'super_admin')) {
+        if (authState != null &&
+            (authState.role == 'admin' || authState.role == 'super_admin')) {
           AppSnackBar.show(context, AppStrings.adminLoginSuccess);
           context.go(AppPaths.adminDashboard);
         } else {
           // Logout immediately if they are not admin
           ref.read(authProvider.notifier).logout();
-          AppSnackBar.show(context, AppStrings.adminAccessDenied, isError: true);
+          AppSnackBar.show(
+            context,
+            AppStrings.adminAccessDenied,
+            isError: true,
+          );
         }
       } else {
         AppSnackBar.show(context, errorMsg, isError: true);
@@ -59,7 +67,11 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
   Future<void> _handleForgotPassword() async {
     final email = _emailController.text.trim();
     if (email.isEmpty || !email.contains('@')) {
-      AppSnackBar.show(context, 'Please enter a valid email address to reset password.', isError: true);
+      AppSnackBar.show(
+        context,
+        'Please enter a valid email address to reset password.',
+        isError: true,
+      );
       return;
     }
 
@@ -173,15 +185,10 @@ class _AdminLoginPageState extends ConsumerState<AdminLoginPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: textColor,
                           foregroundColor: surfaceColor,
-                          padding: const EdgeInsets.symmetric(
-                            vertical: 24,
-                          ),
+                          padding: const EdgeInsets.symmetric(vertical: 24),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(0),
-                            side: BorderSide(
-                              color: textColor,
-                              width: 2,
-                            ),
+                            side: BorderSide(color: textColor, width: 2),
                           ),
                         ),
                         child: Row(

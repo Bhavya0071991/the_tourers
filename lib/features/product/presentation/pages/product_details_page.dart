@@ -250,11 +250,30 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
 
     // Use dynamic images from backend
     final List<Map<String, String>> mediaList = [];
-    final List<String> currentImages =
-        state.availableColors.isNotEmpty &&
-            state.availableColors.containsKey(state.selectedColor)
-        ? state.availableColors[state.selectedColor]!
-        : product.images;
+    
+    final sourceImagesMap = state.selectedPlacement == 'back' && product.backColorImages.isNotEmpty 
+        ? product.backColorImages 
+        : state.availableColors;
+
+    final List<String> currentImages = [];
+    
+    if (product.allowedPlacements.contains('both')) {
+      // For double-sided products, combine front and back images
+      if (state.availableColors.containsKey(state.selectedColor)) {
+        currentImages.addAll(state.availableColors[state.selectedColor]!);
+      } else {
+        currentImages.addAll(product.images);
+      }
+      if (product.backColorImages.containsKey(state.selectedColor)) {
+        currentImages.addAll(product.backColorImages[state.selectedColor]!);
+      }
+    } else {
+      if (sourceImagesMap.isNotEmpty && sourceImagesMap.containsKey(state.selectedColor)) {
+        currentImages.addAll(sourceImagesMap[state.selectedColor]!);
+      } else {
+        currentImages.addAll(product.images);
+      }
+    }
 
     final firstImageUrl = currentImages.isNotEmpty
         ? currentImages.first
@@ -847,6 +866,58 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
           }).toList(),
         ),
         SizedBox(height: isDesktop ? AppSizes.p48 : AppSizes.p32),
+
+        // Placement Selector
+        if (product.allowedPlacements.length > 1 && !product.allowedPlacements.contains('both')) ...[
+          AppText.spaceMono(
+            'DESIGN PLACEMENT',
+            fontSize: isDesktop ? 16 : 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+            color: context.colorScheme.onSurface,
+          ),
+          SizedBox(height: isDesktop ? AppSizes.p16 : AppSizes.p12),
+          Wrap(
+            spacing: 16.0,
+            runSpacing: 16.0,
+            children: product.allowedPlacements.map((placement) {
+              final isSelected = placement == state.selectedPlacement;
+              return BrutalistHoverWidget(
+                shadowColor: context.colorScheme.onSurface,
+                offset: const Offset(4, 4),
+                child: InkWell(
+                  onTap: () {
+                    ref.read(productDetailsProvider.notifier).updatePlacement(placement);
+                  },
+                  child: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isDesktop ? 24 : 16,
+                      vertical: isDesktop ? 16 : 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? context.colorScheme.onSurface
+                          : context.colorScheme.surface,
+                      border: Border.all(
+                        color: context.colorScheme.onSurface,
+                        width: 2,
+                      ),
+                    ),
+                    child: AppText.spaceMono(
+                      placement.toUpperCase(),
+                      fontSize: isDesktop ? 16 : 14,
+                      fontWeight: FontWeight.bold,
+                      color: isSelected
+                          ? context.colorScheme.surface
+                          : context.colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          SizedBox(height: isDesktop ? AppSizes.p48 : AppSizes.p32),
+        ],
 
         if (isQuoteProduct) ...[
           _buildQuoteCustomizer(context, product),

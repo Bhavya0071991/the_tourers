@@ -337,10 +337,10 @@ class _CartPageState extends ConsumerState<CartPage> {
                   children: [
                     Positioned.fill(
                       child:
-                          (item.frontDesignPreview != null &&
-                              item.frontDesignPreview!.startsWith('http'))
+                          ((item.backDesignPreview ?? item.frontDesignPreview) != null &&
+                              (item.backDesignPreview ?? item.frontDesignPreview)!.startsWith('http'))
                           ? AppImage(
-                              imageUrl: item.frontDesignPreview!,
+                              imageUrl: (item.backDesignPreview ?? item.frontDesignPreview)!,
                               fit: BoxFit.cover,
                               alignment: Alignment.topCenter,
                               memCacheWidth: 400,
@@ -358,11 +358,11 @@ class _CartPageState extends ConsumerState<CartPage> {
                               memCacheWidth: 400,
                             ),
                     ),
-                    if (item.frontDesignPreview != null &&
-                        !item.frontDesignPreview!.startsWith('http'))
+                    if ((item.backDesignPreview ?? item.frontDesignPreview) != null &&
+                        !(item.backDesignPreview ?? item.frontDesignPreview)!.startsWith('http'))
                       Positioned.fill(
                         child: Image.memory(
-                          base64Decode(item.frontDesignPreview!),
+                          base64Decode((item.backDesignPreview ?? item.frontDesignPreview)!),
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -434,6 +434,21 @@ class _CartPageState extends ConsumerState<CartPage> {
                                 fontSize: 9,
                                 fontWeight: FontWeight.bold,
                                 color: Theme.of(context).colorScheme.surface,
+                              ),
+                            ),
+                          const SizedBox(width: 8),
+                          if (item.backPrintUrl != null)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              color: Colors.redAccent,
+                              child: AppText.spaceMono(
+                                'BACK PRINT',
+                                fontSize: 9,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
                               ),
                             ),
                         ],

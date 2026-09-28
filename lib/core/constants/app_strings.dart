@@ -75,7 +75,7 @@ class AppStrings {
   static const String quickView = 'QUICK VIEW +';
 
   // Footer
-  static const String footerWatermark = 'DESIGNED FOR THE TRAVELLERS';
+  static const String footerWatermark = 'DESIGNED FROM HIMALAYAS';
   static const String footerWatermarkAbout = 'DESIGNED FOR THE TRAVELLERS';
   static const String footerCopyright = '© 2026 THE TOURERS\nPrivacy Policy.';
 
@@ -104,22 +104,29 @@ class AppStrings {
 
   // Shipping Info
   static const String productShippingInfoTitle = 'Shipping Info';
-  static const String productShippingInfoBody = 'We offer free shipping across India.';
+  static const String productShippingInfoBody =
+      'We offer free shipping across India.';
   static const String productDispatchTitle = '2-3 Days Dispatch';
-  static const String productDispatchBody = 'Orders are printed and processed within 2-3 business days.';
+  static const String productDispatchBody =
+      'Orders are printed and processed within 2-3 business days.';
   static const String productDeliveryTitle = '2-5 Days Delivery';
-  static const String productDeliveryBody = 'Once dispatched, delivery takes 2-5 working days depending on your location.\nMetros: 2-3 days\nRest of India: 3-5 days';
+  static const String productDeliveryBody =
+      'Once dispatched, delivery takes 2-5 working days depending on your location.\nMetros: 2-3 days\nRest of India: 3-5 days';
   static const String productSupportTitle = 'Customer Support';
   static const String productSupportEmail = 'support@thetourers.in';
 
   // Returns Policy
-  static const String productReturnsGeneral = 'Because our items are custom-printed on demand, we do not offer general returns or exchanges for size or preference.';
+  static const String productReturnsGeneral =
+      'Because our items are custom-printed on demand, we do not offer general returns or exchanges for size or preference.';
   static const String productDefectTitle = 'Damaged or Defective Products';
-  static const String productDefectBody = 'If you receive a defective or damaged product, you can request a replacement or refund within 7 days of delivery.';
+  static const String productDefectBody =
+      'If you receive a defective or damaged product, you can request a replacement or refund within 7 days of delivery.';
   static const String productEvidenceTitle = 'Required Evidence';
-  static const String productEvidenceBody = 'To process a defect claim, you must provide an unboxing video, photographs of the damaged product, and the original packaging. Please contact support to initiate the process.';
+  static const String productEvidenceBody =
+      'To process a defect claim, you must provide an unboxing video, photographs of the damaged product, and the original packaging. Please contact support to initiate the process.';
   static const String productRtoTitle = 'Incorrect Address / RTO';
-  static const String productRtoBody = 'We are not responsible for packages lost or returned due to an incorrectly provided address. Re-shipping returned items may incur additional courier charges.';
+  static const String productRtoBody =
+      'We are not responsible for packages lost or returned due to an incorrectly provided address. Re-shipping returned items may incur additional courier charges.';
 
   // Checkout Receipt Dialog
   static const String invoiceTitle = '/// ORDER INVOICE';
@@ -193,10 +200,10 @@ class AppStrings {
       'Access Denied: You do not have admin privileges';
   static const String adminEnterEmailPassword =
       'Please enter email and password';
-  static const String adminHeaderTitle = 'EPOD ADMIN';
+  static const String adminHeaderTitle = 'THE TOURERS ADMIN';
   static const String adminLoginTitle = 'ADMIN LOGIN';
   static const String adminLoginSubtitle =
-      'Access the EPOD administrative panel.';
+      'Access the The Tourers administrative panel.';
   static const String adminEmailHint = 'ADMIN EMAIL';
   static const String adminPasswordHint = 'PASSWORD';
   static const String adminEnterDashboard = 'ENTER DASHBOARD';

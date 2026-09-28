@@ -35,6 +35,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
 
   String _selectedGender = 'mens';
   String _selectedCategory = 'design';
+  String _placementType = 'front'; // 'front', 'back', 'front_back', 'both'
 
   final List<_ColorVariantData> _colorVariants = [];
   final ImagePicker _picker = ImagePicker();
@@ -63,24 +64,42 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
               _tagController.text = product.tag ?? '';
               _selectedGender = product.gender;
               _selectedCategory = product.category;
+              
+              if (product.allowedPlacements.contains('both')) {
+                _placementType = 'both';
+              } else if (product.allowedPlacements.contains('front') && product.allowedPlacements.contains('back')) {
+                _placementType = 'front_back';
+              } else if (product.allowedPlacements.contains('back')) {
+                _placementType = 'back';
+              } else {
+                _placementType = 'front';
+              }
 
               if (product.colorImages.isNotEmpty) {
                 product.colorImages.forEach((color, urls) {
                   final designUrl = product.colorDesignImages[color];
+                  final backUrls = product.backColorImages[color] ?? [];
+                  final backDesignUrl = product.backColorDesignImages[color];
                   _colorVariants.add(
                     _ColorVariantData(
                       color, 
                       urls.map((url) => _ImageData(url: url)).toList(),
+                      backImages: backUrls.map((url) => _ImageData(url: url)).toList(),
                       designImage: designUrl != null ? _ImageData(url: designUrl) : null,
+                      backDesignImage: backDesignUrl != null ? _ImageData(url: backDesignUrl) : null,
                     )
                   );
                 });
               } else if (product.images.isNotEmpty) {
                 final designUrl = product.colorDesignImages['Black'];
-                _colorVariants.add(_ColorVariantData('Black', product.images.map((url) => _ImageData(url: url)).toList(), designImage: designUrl != null ? _ImageData(url: designUrl) : null,));
+                final backUrls = product.backColorImages['Black'] ?? [];
+                final backDesignUrl = product.backColorDesignImages['Black'];
+                _colorVariants.add(_ColorVariantData('Black', product.images.map((url) => _ImageData(url: url)).toList(), backImages: backUrls.map((url) => _ImageData(url: url)).toList(), designImage: designUrl != null ? _ImageData(url: designUrl) : null, backDesignImage: backDesignUrl != null ? _ImageData(url: backDesignUrl) : null,));
               } else if (product.image != null) {
                 final designUrl = product.colorDesignImages['Black'];
-                _colorVariants.add(_ColorVariantData('Black', [_ImageData(url: product.image!)], designImage: designUrl != null ? _ImageData(url: designUrl) : null,));
+                final backUrls = product.backColorImages['Black'] ?? [];
+                final backDesignUrl = product.backColorDesignImages['Black'];
+                _colorVariants.add(_ColorVariantData('Black', [_ImageData(url: product.image!)], backImages: backUrls.map((url) => _ImageData(url: url)).toList(), designImage: designUrl != null ? _ImageData(url: designUrl) : null, backDesignImage: backDesignUrl != null ? _ImageData(url: backDesignUrl) : null,));
               }
             });
           }
@@ -101,7 +120,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
     super.dispose();
   }
 
-  Future<void> _pickImages(int variantIndex) async {
+  Future<void> _pickImages(int variantIndex, {bool isBack = false}) async {
     try {
       final List<XFile> selectedImages = await _picker.pickMultiImage(
         imageQuality: 70,
@@ -109,7 +128,8 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
       );
 
       if (selectedImages.isNotEmpty) {
-        if (_colorVariants[variantIndex].images.length + selectedImages.length > 10) {
+        final currentList = isBack ? _colorVariants[variantIndex].backImages : _colorVariants[variantIndex].images;
+        if (currentList.length + selectedImages.length > 10) {
           if (!context.mounted) return;
           AppSnackBar.show(context, 'You can only upload up to 10 images.');
           return;
@@ -142,9 +162,15 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
 
           if (croppedFile != null) {
             final bytes = await croppedFile.readAsBytes();
-            _colorVariants[variantIndex].images.add(
-              _ImageData(bytes: bytes, extension: image.name.split('.').last),
-            );
+            if (isBack) {
+              _colorVariants[variantIndex].backImages.add(
+                _ImageData(bytes: bytes, extension: image.name.split('.').last),
+              );
+            } else {
+              _colorVariants[variantIndex].images.add(
+                _ImageData(bytes: bytes, extension: image.name.split('.').last),
+              );
+            }
           }
         }
         setState(() {});
@@ -155,7 +181,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
     }
   }
 
-  Future<void> _pickDesignImage(int variantIndex) async {
+  Future<void> _pickDesignImage(int variantIndex, {bool isBack = false}) async {
     try {
       final XFile? selectedImage = await _picker.pickImage(
         source: ImageSource.gallery,
@@ -165,10 +191,17 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
       if (selectedImage != null) {
         final bytes = await selectedImage.readAsBytes();
         setState(() {
-          _colorVariants[variantIndex].designImage = _ImageData(
-            bytes: bytes,
-            extension: selectedImage.name.split('.').last,
-          );
+          if (isBack) {
+            _colorVariants[variantIndex].backDesignImage = _ImageData(
+              bytes: bytes,
+              extension: selectedImage.name.split('.').last,
+            );
+          } else {
+            _colorVariants[variantIndex].designImage = _ImageData(
+              bytes: bytes,
+              extension: selectedImage.name.split('.').last,
+            );
+          }
         });
       }
     } catch (e) {
@@ -177,9 +210,13 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
     }
   }
 
-  void _removeImage(int variantIndex, int imageIndex) {
+  void _removeImage(int variantIndex, int imageIndex, {bool isBack = false}) {
     setState(() {
-      _colorVariants[variantIndex].images.removeAt(imageIndex);
+      if (isBack) {
+        _colorVariants[variantIndex].backImages.removeAt(imageIndex);
+      } else {
+        _colorVariants[variantIndex].images.removeAt(imageIndex);
+      }
     });
   }
   
@@ -195,16 +232,43 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
     });
   }
 
-  void _removeDesignImage(int variantIndex) {
+  void _removeDesignImage(int variantIndex, {bool isBack = false}) {
     setState(() {
-      _colorVariants[variantIndex].designImage = null;
+      if (isBack) {
+        _colorVariants[variantIndex].backDesignImage = null;
+      } else {
+        _colorVariants[variantIndex].designImage = null;
+      }
     });
   }
 
   Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      if (_colorVariants.isEmpty || _colorVariants.any((v) => v.images.length < 2 || v.designImage == null)) {
-        AppSnackBar.show(context, 'Please add at least one color variant. Each must have at least 2 gallery images and 1 transparent design image.');
+      if (_colorVariants.isEmpty) {
+        AppSnackBar.show(context, 'Please add at least one color variant.');
+        return;
+      }
+
+      final bool requiresFront = _placementType == 'front' || _placementType == 'front_back' || _placementType == 'both';
+      final bool requiresBack = _placementType == 'back' || _placementType == 'front_back' || _placementType == 'both';
+
+      if (!requiresFront && _colorVariants.any((v) => v.images.isNotEmpty || v.designImage != null)) {
+        AppSnackBar.show(context, 'Front print is not allowed, but you have uploaded front images. Please remove them.');
+        return;
+      }
+
+      if (!requiresBack && _colorVariants.any((v) => v.backImages.isNotEmpty || v.backDesignImage != null)) {
+        AppSnackBar.show(context, 'Back print is not allowed, but you have uploaded back images. Please remove them.');
+        return;
+      }
+
+      if (requiresFront && _colorVariants.any((v) => v.images.length < 2 || v.designImage == null)) {
+        AppSnackBar.show(context, 'For Front Print, each variant must have at least 2 gallery images and 1 transparent design image.');
+        return;
+      }
+
+      if (requiresBack && _colorVariants.any((v) => v.backImages.isEmpty || v.backDesignImage == null)) {
+        AppSnackBar.show(context, 'For Back Print, each variant must have at least 1 back mockup image and 1 transparent back design image.');
         return;
       }
 
@@ -214,7 +278,9 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
 
       try {
         Map<String, List<String>> uploadedColorImages = {};
+        Map<String, List<String>> uploadedBackColorImages = {};
         Map<String, String> uploadedColorDesignImages = {};
+        Map<String, String> uploadedBackColorDesignImages = {};
         
         for (var variant in _colorVariants) {
           List<String> variantUrls = [];
@@ -232,6 +298,23 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
           }
           uploadedColorImages[variant.name] = variantUrls;
 
+          List<String> backVariantUrls = [];
+          for (var img in variant.backImages) {
+            if (img.isNetwork) {
+              backVariantUrls.add(img.url!);
+            } else if (img.bytes != null) {
+              final ext = img.extension ?? 'png';
+              final fileName = 'products/${const Uuid().v4()}.$ext';
+              final publicUrl = await ref
+                  .read(storageRepositoryProvider)
+                  .uploadBinary('product-images', fileName, img.bytes!);
+              backVariantUrls.add(publicUrl);
+            }
+          }
+          if (backVariantUrls.isNotEmpty) {
+            uploadedBackColorImages[variant.name] = backVariantUrls;
+          }
+
           if (variant.designImage != null) {
             if (variant.designImage!.isNetwork) {
               uploadedColorDesignImages[variant.name] = variant.designImage!.url!;
@@ -242,6 +325,19 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                   .read(storageRepositoryProvider)
                   .uploadBinary('qikink-designs', fileName, variant.designImage!.bytes!);
               uploadedColorDesignImages[variant.name] = publicUrl;
+            }
+          }
+
+          if (variant.backDesignImage != null) {
+            if (variant.backDesignImage!.isNetwork) {
+              uploadedBackColorDesignImages[variant.name] = variant.backDesignImage!.url!;
+            } else if (variant.backDesignImage!.bytes != null) {
+              final ext = variant.backDesignImage!.extension ?? 'png';
+              final fileName = 'designs/${const Uuid().v4()}.$ext';
+              final publicUrl = await ref
+                  .read(storageRepositoryProvider)
+                  .uploadBinary('qikink-designs', fileName, variant.backDesignImage!.bytes!);
+              uploadedBackColorDesignImages[variant.name] = publicUrl;
             }
           }
         }
@@ -259,9 +355,16 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
           images: uploadedUrls,
           colorImages: uploadedColorImages,
           colorDesignImages: uploadedColorDesignImages,
+          backColorDesignImages: uploadedBackColorDesignImages,
           tag: _tagController.text.trim(),
           gender: _selectedGender,
           category: _selectedCategory,
+          allowedPlacements: _placementType == 'both' 
+              ? ['both'] 
+              : _placementType == 'front_back' 
+                  ? ['front', 'back'] 
+                  : [_placementType],
+          backColorImages: uploadedBackColorImages,
         );
 
         if (isEditing) {
@@ -509,6 +612,72 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                   ],
                 ),
                 const SizedBox(height: 24),
+                
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildLabel('ALLOWED PLACEMENTS', textColor),
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: textColor, width: 2),
+                              color: surfaceColor,
+                            ),
+                            padding: const EdgeInsets.symmetric(horizontal: 16),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _placementType,
+                                isExpanded: true,
+                                icon: Icon(
+                                  Icons.arrow_drop_down,
+                                  color: textColor,
+                                ),
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'front',
+                                    child: Text(
+                                      'Front Print Only',
+                                      style: TextStyle(fontFamily: 'SpaceMono'),
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'back',
+                                    child: Text(
+                                      'Back Print Only',
+                                      style: TextStyle(fontFamily: 'SpaceMono'),
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'front_back',
+                                    child: Text(
+                                      'Customer Chooses (Front OR Back)',
+                                      style: TextStyle(fontFamily: 'SpaceMono'),
+                                    ),
+                                  ),
+                                  DropdownMenuItem(
+                                    value: 'both',
+                                    child: Text(
+                                      'Double-Sided (Front AND Back)',
+                                      style: TextStyle(fontFamily: 'SpaceMono'),
+                                    ),
+                                  ),
+                                ],
+                                onChanged: (val) {
+                                  if (val != null) {
+                                    setState(() => _placementType = val);
+                                  }
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
 
                 // Color Variants Section
                 Row(
@@ -634,6 +803,58 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
+                            AppText.spaceMono('Back Mockup Images (${variant.backImages.length}/10)', fontSize: 12, color: textColor),
+                            TextButton.icon(
+                              onPressed: () => _pickImages(variantIndex, isBack: true),
+                              icon: Icon(Icons.upload, size: 16, color: textColor),
+                              label: AppText.spaceMono('UPLOAD BACK', fontSize: 12, color: textColor),
+                            )
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        if (variant.backImages.isNotEmpty)
+                          GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 5,
+                                  crossAxisSpacing: 8,
+                                  mainAxisSpacing: 8,
+                                ),
+                            itemCount: variant.backImages.length,
+                            itemBuilder: (context, imgIndex) {
+                              final img = variant.backImages[imgIndex];
+                              return Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: textColor, width: 2),
+                                    ),
+                                    child: img.isNetwork
+                                        ? AppImage(imageUrl: img.url!, fit: BoxFit.cover)
+                                        : Image.memory(img.bytes!, fit: BoxFit.cover),
+                                  ),
+                                  Positioned(
+                                    top: 2,
+                                    right: 2,
+                                    child: InkWell(
+                                      onTap: () => _removeImage(variantIndex, imgIndex, isBack: true),
+                                      child: Container(
+                                        color: textColor,
+                                        padding: const EdgeInsets.all(2),
+                                        child: Icon(Icons.close, color: surfaceColor, size: 12),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
                             AppText.spaceMono('Transparent Design PNG', fontSize: 12, color: textColor),
                             TextButton.icon(
                               onPressed: () => _pickDesignImage(variantIndex),
@@ -662,6 +883,48 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                 right: 2,
                                 child: InkWell(
                                   onTap: () => _removeDesignImage(variantIndex),
+                                  child: Container(
+                                    color: textColor,
+                                    padding: const EdgeInsets.all(2),
+                                    child: Icon(Icons.close, color: surfaceColor, size: 12),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                        const SizedBox(height: 16),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            AppText.spaceMono('Back Transparent Design PNG', fontSize: 12, color: textColor),
+                            TextButton.icon(
+                              onPressed: () => _pickDesignImage(variantIndex, isBack: true),
+                              icon: Icon(Icons.upload, size: 16, color: textColor),
+                              label: AppText.spaceMono('UPLOAD BACK', fontSize: 12, color: textColor),
+                            )
+                          ],
+                        ),
+                        if (variant.backDesignImage != null) ...[
+                          const SizedBox(height: 8),
+                          Stack(
+                            children: [
+                              Container(
+                                height: 120,
+                                width: 120,
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: textColor, width: 2),
+                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                ),
+                                child: variant.backDesignImage!.isNetwork
+                                    ? AppImage(imageUrl: variant.backDesignImage!.url!, fit: BoxFit.contain)
+                                    : Image.memory(variant.backDesignImage!.bytes!, fit: BoxFit.contain),
+                              ),
+                              Positioned(
+                                top: 2,
+                                right: 2,
+                                child: InkWell(
+                                  onTap: () => _removeDesignImage(variantIndex, isBack: true),
                                   child: Container(
                                     color: textColor,
                                     padding: const EdgeInsets.all(2),
@@ -831,8 +1094,10 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
 class _ColorVariantData {
   String name;
   List<_ImageData> images;
+  List<_ImageData> backImages;
   _ImageData? designImage;
-  _ColorVariantData(this.name, this.images, {this.designImage});
+  _ImageData? backDesignImage;
+  _ColorVariantData(this.name, this.images, {this.backImages = const [], this.designImage, this.backDesignImage});
 }
 
 class _ImageData {

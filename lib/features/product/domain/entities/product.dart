@@ -38,11 +38,14 @@ class Product extends Equatable {
   final List<String> images; // Gallery images
   final Map<String, List<String>> colorImages; // Images per color variant
   final Map<String, String> colorDesignImages; // Transparent PNG per color variant
+  final Map<String, String> backColorDesignImages; // Back Transparent PNG per color variant
   final String? mockup;
   final String? tag;
   final String gender; // 'mens', 'womens', 'unisex'
   final String category; // 'design', 'quotes', 'anime', etc.
   final bool isFavorite;
+  final List<String> allowedPlacements; // e.g., ['front', 'back']
+  final Map<String, List<String>> backColorImages; // Back mockups per color variant
 
   const Product({
     required this.id,
@@ -54,11 +57,14 @@ class Product extends Equatable {
     this.images = const [],
     this.colorImages = const {},
     this.colorDesignImages = const {},
+    this.backColorDesignImages = const {},
     this.mockup,
     this.tag,
     required this.gender,
     required this.category,
     this.isFavorite = false,
+    this.allowedPlacements = const ['front'],
+    this.backColorImages = const {},
   });
 
   /// Factory constructor to create a Product from the routing parameters Map
@@ -81,11 +87,14 @@ class Product extends Equatable {
       images: parsedImages,
       colorImages: map['colorImages'] != null ? _decodeColorImages(map['colorImages']!) : const {},
       colorDesignImages: map['colorDesignImages'] != null ? _decodeColorDesignImages(map['colorDesignImages']!) : const {},
+      backColorDesignImages: map['backColorDesignImages'] != null ? _decodeColorDesignImages(map['backColorDesignImages']!) : const {},
       mockup: map['mockup'],
       tag: map['tag'],
       gender: map['gender'] ?? 'mens',
       category: map['category'] ?? 'design',
       isFavorite: map['isFavorite'] == 'true',
+      allowedPlacements: map['allowedPlacements'] != null ? map['allowedPlacements']!.split(',') : const ['front'],
+      backColorImages: map['backColorImages'] != null ? _decodeColorImages(map['backColorImages']!) : const {},
     );
   }
 
@@ -108,6 +117,16 @@ class Product extends Equatable {
       });
     }
 
+    Map<String, List<String>> parsedBackColorImages = {};
+    if (json['back_color_images'] != null && json['back_color_images'] is Map) {
+      final map = json['back_color_images'] as Map;
+      map.forEach((key, value) {
+        if (value is List) {
+          parsedBackColorImages[key.toString()] = value.map((e) => e.toString()).toList();
+        }
+      });
+    }
+
     Map<String, String> parsedColorDesignImages = {};
     if (json['color_design_images'] != null && json['color_design_images'] is Map) {
       final map = json['color_design_images'] as Map;
@@ -122,6 +141,14 @@ class Product extends Equatable {
       }
     }
 
+    Map<String, String> parsedBackColorDesignImages = {};
+    if (json['back_color_design_images'] != null && json['back_color_design_images'] is Map) {
+      final map = json['back_color_design_images'] as Map;
+      map.forEach((key, value) {
+        parsedBackColorDesignImages[key.toString()] = value.toString();
+      });
+    }
+
     return Product(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? 'UNKNOWN PRODUCT',
@@ -132,11 +159,14 @@ class Product extends Equatable {
       images: parsedImages,
       colorImages: parsedColorImages,
       colorDesignImages: parsedColorDesignImages,
+      backColorDesignImages: parsedBackColorDesignImages,
       mockup: json['mockup']?.toString(),
       tag: json['tag']?.toString(),
       gender: json['gender']?.toString() ?? 'mens',
       category: json['category']?.toString() ?? 'design',
       isFavorite: json['is_favorite'] == true || json['isFavorite'] == true,
+      allowedPlacements: (json['allowed_placements'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const ['front'],
+      backColorImages: parsedBackColorImages,
     );
   }
 
@@ -155,9 +185,12 @@ class Product extends Equatable {
       if (images.isNotEmpty) 'images': images.join('||'),
       if (colorImages.isNotEmpty) 'colorImages': _encodeColorImages(colorImages),
       if (colorDesignImages.isNotEmpty) 'colorDesignImages': _encodeColorDesignImages(colorDesignImages),
+      if (backColorDesignImages.isNotEmpty) 'backColorDesignImages': _encodeColorDesignImages(backColorDesignImages),
       if (mockup != null) 'mockup': mockup!,
       if (tag != null) 'tag': tag!,
       'isFavorite': isFavorite.toString(),
+      if (allowedPlacements.isNotEmpty) 'allowedPlacements': allowedPlacements.join(','),
+      if (backColorImages.isNotEmpty) 'backColorImages': _encodeColorImages(backColorImages),
     };
   }
 
@@ -172,10 +205,13 @@ class Product extends Equatable {
         images,
         colorImages,
         colorDesignImages,
+        backColorDesignImages,
         mockup,
         tag,
         gender,
         category,
         isFavorite,
+        allowedPlacements,
+        backColorImages,
       ];
 }

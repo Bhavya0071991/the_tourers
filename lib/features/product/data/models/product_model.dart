@@ -12,10 +12,13 @@ class ProductModel extends Product {
     super.images = const [],
     super.colorImages = const {},
     super.colorDesignImages = const {},
+    super.backColorDesignImages = const {},
     super.mockup,
     super.tag,
     required super.gender,
     required super.category,
+    super.allowedPlacements = const ['front'],
+    super.backColorImages = const {},
   });
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -42,6 +45,28 @@ class ProductModel extends Product {
         map.forEach((key, value) {
           if (value is List) {
             parsedColorImages[key.toString()] = value.map((e) => e.toString()).toList();
+          }
+        });
+      }
+    }
+
+    Map<String, List<String>> parsedBackColorImages = {};
+    if (json['back_color_images'] != null) {
+      Map? map;
+      if (json['back_color_images'] is String) {
+        try {
+          map = jsonDecode(json['back_color_images']) as Map?;
+        } catch (e) {
+          // Ignore parse errors
+        }
+      } else if (json['back_color_images'] is Map) {
+        map = json['back_color_images'] as Map;
+      }
+      
+      if (map != null) {
+        map.forEach((key, value) {
+          if (value is List) {
+            parsedBackColorImages[key.toString()] = value.map((e) => e.toString()).toList();
           }
         });
       }
@@ -83,6 +108,23 @@ class ProductModel extends Product {
       }
     }
 
+    Map<String, String> parsedBackColorDesignImages = {};
+    if (json['back_color_design_images'] != null) {
+      Map? map;
+      if (json['back_color_design_images'] is String) {
+        try {
+          map = jsonDecode(json['back_color_design_images']) as Map?;
+        } catch (e) {}
+      } else if (json['back_color_design_images'] is Map) {
+        map = json['back_color_design_images'] as Map;
+      }
+      if (map != null) {
+        map.forEach((key, value) {
+          parsedBackColorDesignImages[key.toString()] = value.toString();
+        });
+      }
+    }
+
     return ProductModel(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -93,10 +135,13 @@ class ProductModel extends Product {
       images: parsedImages,
       colorImages: parsedColorImages,
       colorDesignImages: parsedColorDesignImages,
+      backColorDesignImages: parsedBackColorDesignImages,
       mockup: json['mockup'] as String?,
       tag: json['tag'] as String?,
       gender: json['gender'] as String,
       category: json['category'] as String,
+      allowedPlacements: (json['allowed_placements'] as List<dynamic>?)?.map((e) => e.toString()).toList() ?? const ['front'],
+      backColorImages: parsedBackColorImages,
     );
   }
 
@@ -120,10 +165,13 @@ class ProductModel extends Product {
       'images': images,
       'color_images': colorImages,
       'color_design_images': colorDesignImages,
+      'back_color_design_images': backColorDesignImages,
       'mockup': mockup,
       'tag': tag,
       'gender': gender,
       'category': category,
+      'allowed_placements': allowedPlacements,
+      'back_color_images': backColorImages,
     };
   }
 }

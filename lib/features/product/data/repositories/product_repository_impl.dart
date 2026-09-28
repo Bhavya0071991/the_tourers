@@ -47,10 +47,13 @@ class ProductRepositoryImpl implements ProductRepository {
       images: product.images,
       colorImages: product.colorImages,
       colorDesignImages: product.colorDesignImages,
+      backColorDesignImages: product.backColorDesignImages,
       mockup: product.mockup,
       tag: product.tag,
       gender: product.gender,
       category: product.category,
+      allowedPlacements: product.allowedPlacements,
+      backColorImages: product.backColorImages,
     );
     return await _remoteDataSource.addProduct(model);
   }
@@ -67,10 +70,13 @@ class ProductRepositoryImpl implements ProductRepository {
       images: product.images,
       colorImages: product.colorImages,
       colorDesignImages: product.colorDesignImages,
+      backColorDesignImages: product.backColorDesignImages,
       mockup: product.mockup,
       tag: product.tag,
       gender: product.gender,
       category: product.category,
+      allowedPlacements: product.allowedPlacements,
+      backColorImages: product.backColorImages,
     );
     return await _remoteDataSource.updateProduct(model);
   }

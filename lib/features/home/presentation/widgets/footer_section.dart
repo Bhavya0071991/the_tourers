@@ -48,17 +48,20 @@ class _FooterSectionState extends State<FooterSection>
         children: [
           // Background Watermark Text
           Positioned(
-            bottom: -40,
+            bottom: 0,
             left: 0,
             right: 0,
-            child: AppText.bebas(
-              AppStrings.footerWatermark,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              fontSize: isDesktop ? 220 : 60,
-              color: textColor.withValues(alpha: 0.03),
-              height: 1.0,
-              letterSpacing: 5.0,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: AppText.bebas(
+                AppStrings.footerWatermark,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                fontSize: isDesktop ? 220 : 60,
+                color: textColor.withValues(alpha: 0.03),
+                height: 1.0,
+                letterSpacing: 5.0,
+              ),
             ),
           ),
 

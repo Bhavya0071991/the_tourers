@@ -60,6 +60,7 @@ class ProductDetailsNotifier extends Notifier<ProductDetailsState> {
       currentMediaIndex: 0,
       availableColors: colors,
       selectedColor: selectedColor,
+      selectedPlacement: product.allowedPlacements.isNotEmpty ? product.allowedPlacements.first : 'front',
     );
   }
 
@@ -79,6 +80,10 @@ class ProductDetailsNotifier extends Notifier<ProductDetailsState> {
     state = state.copyWith(customText: text);
   }
 
+  void updatePlacement(String placement) {
+    state = state.copyWith(selectedPlacement: placement, currentMediaIndex: 0);
+  }
+
   /// Handles the logic to add the item to the cart
   Future<void> addToCart(
     Product product,
@@ -88,17 +93,27 @@ class ProductDetailsNotifier extends Notifier<ProductDetailsState> {
     final productToAdd = product.toMap();
     String? displayImage;
     String? frontPrintUrl;
+    String? backPrintUrl;
 
     if (state.availableColors.containsKey(state.selectedColor) && 
         state.availableColors[state.selectedColor]!.isNotEmpty) {
-      displayImage = state.availableColors[state.selectedColor]!.first;
+      if (state.selectedPlacement == 'back' && product.backColorImages.containsKey(state.selectedColor) && product.backColorImages[state.selectedColor]!.isNotEmpty) {
+         displayImage = product.backColorImages[state.selectedColor]!.first;
+      } else {
+         displayImage = state.availableColors[state.selectedColor]!.first;
+      }
       productToAdd['image'] = displayImage;
     }
 
-    if (product.colorDesignImages.containsKey(state.selectedColor)) {
-      frontPrintUrl = product.colorDesignImages[state.selectedColor];
-    } else if (product.colorDesignImages.containsKey('Black')) {
-      frontPrintUrl = product.colorDesignImages['Black'];
+    if (product.allowedPlacements.contains('both')) {
+      frontPrintUrl = product.colorDesignImages[state.selectedColor] ?? product.colorDesignImages['Black'];
+      backPrintUrl = product.backColorDesignImages[state.selectedColor] ?? product.backColorDesignImages['Black'];
+    } else {
+      if (state.selectedPlacement == 'back') {
+        backPrintUrl = product.backColorDesignImages[state.selectedColor] ?? product.backColorDesignImages['Black'];
+      } else {
+        frontPrintUrl = product.colorDesignImages[state.selectedColor] ?? product.colorDesignImages['Black'];
+      }
     }
 
     if (resolvedMockupUrl.isNotEmpty) {
@@ -112,8 +127,10 @@ class ProductDetailsNotifier extends Notifier<ProductDetailsState> {
           productToAdd,
           '${state.selectedSize} / ${state.selectedColor}',
           customText: customQuote.isNotEmpty ? customQuote : null,
-          frontDesignPreview: displayImage,
+          frontDesignPreview: (state.selectedPlacement == 'front' || product.allowedPlacements.contains('both')) ? displayImage : null,
           frontPrintUrl: frontPrintUrl,
+          backDesignPreview: (state.selectedPlacement == 'back' || product.allowedPlacements.contains('both')) ? displayImage : null,
+          backPrintUrl: backPrintUrl,
         );
   }
 }

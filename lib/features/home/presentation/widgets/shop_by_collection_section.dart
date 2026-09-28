@@ -179,20 +179,19 @@ class _CollectionCardState extends State<_CollectionCard> {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
         width: width,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(
-            color: primaryColor,
-            width: _isHovered ? 3 : 2, // Brutalist thick borders
-          ),
-        ),
+        decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(8),
           child: Stack(
             fit: StackFit.expand,
             children: [
               // Background Image
-              Image.network(widget.data.imageUrl, fit: BoxFit.cover),
+              AnimatedScale(
+                scale: _isHovered ? 1.08 : 1.0,
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeOutCubic,
+                child: Image.network(widget.data.imageUrl, fit: BoxFit.cover),
+              ),
               // Dark Gradient Overlay for readability
               Container(
                 decoration: BoxDecoration(

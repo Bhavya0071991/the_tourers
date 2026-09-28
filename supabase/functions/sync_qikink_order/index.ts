@@ -187,7 +187,8 @@
         }
 
         // Fallbacks in case of upload failure or empty design
-        if (!finalFrontDesignUrl) {
+        // Only use fallback if BOTH front and back are empty (prevent empty orders)
+        if (!finalFrontDesignUrl && !finalBackDesignUrl) {
           finalFrontDesignUrl = "https://sgp1.digitaloceanspaces.com/cdn.qikink.com/erp2/assets/designs/83/1696668376.jpg";
           finalFrontMockupUrl = "https://sgp1.digitaloceanspaces.com/cdn.qikink.com/erp2/assets/designs/83/1696668376.jpg";
         }
@@ -201,30 +202,35 @@
         // "UC22" (Oversized), colorCode ("Bk" or "Wh"), actualSize (S/M/L/XL)
         const dynamicSku = `UC22-${colorCode}-${actualSize}`;
         
+        const productDesigns = [];
+        if (finalFrontDesignUrl) {
+          productDesigns.push({
+            design_code: `CUST-FR-${orderData.id.split('-')[0]}`,
+            placement_sku: "fr",
+            mockup_link: finalFrontMockupUrl,
+            design_link: finalFrontDesignUrl,
+            width_inches: "10", 
+            height_inches: "10" 
+          });
+        }
+        if (finalBackDesignUrl) {
+          productDesigns.push({
+            design_code: `CUST-BK-${orderData.id.split('-')[0]}`,
+            placement_sku: "bk",
+            mockup_link: finalBackMockupUrl,
+            design_link: finalBackDesignUrl,
+            width_inches: "10",
+            height_inches: "10"
+          });
+        }
+        
         qikinkItems.push({
           sku: dynamicSku, 
           quantity: parseInt(item.quantity, 10) || 1,
           price: parseFloat(item.price) || 0,
           search_from_my_products: 0,
-          print_type_id: 1, // 1 = DTG (Using 1 for Sandbox API testing because Sandbox rejects 17 for this blank)
-          designs: [
-            {
-              design_code: `CUST-FR-${orderData.id.split('-')[0]}`,
-              placement_sku: "fr",
-              mockup_link: finalFrontMockupUrl,
-              design_link: finalFrontDesignUrl,
-              width_inches: "10", 
-              height_inches: "10" 
-            },
-            ...(finalBackDesignUrl ? [{
-              design_code: `CUST-BK-${orderData.id.split('-')[0]}`,
-              placement_sku: "bk",
-              mockup_link: finalBackMockupUrl,
-              design_link: finalBackDesignUrl,
-              width_inches: "10",
-              height_inches: "10"
-            }] : [])
-          ]
+          print_type_id: 1, // 1 = DTG
+          designs: productDesigns
         });
       }
 
