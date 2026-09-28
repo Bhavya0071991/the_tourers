@@ -250,13 +250,14 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
 
     // Use dynamic images from backend
     final List<Map<String, String>> mediaList = [];
-    
-    final sourceImagesMap = state.selectedPlacement == 'back' && product.backColorImages.isNotEmpty 
-        ? product.backColorImages 
+
+    final sourceImagesMap =
+        state.selectedPlacement == 'back' && product.backColorImages.isNotEmpty
+        ? product.backColorImages
         : state.availableColors;
 
     final List<String> currentImages = [];
-    
+
     if (product.allowedPlacements.contains('both')) {
       // For double-sided products, combine front and back images
       if (state.availableColors.containsKey(state.selectedColor)) {
@@ -268,7 +269,8 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
         currentImages.addAll(product.backColorImages[state.selectedColor]!);
       }
     } else {
-      if (sourceImagesMap.isNotEmpty && sourceImagesMap.containsKey(state.selectedColor)) {
+      if (sourceImagesMap.isNotEmpty &&
+          sourceImagesMap.containsKey(state.selectedColor)) {
         currentImages.addAll(sourceImagesMap[state.selectedColor]!);
       } else {
         currentImages.addAll(product.images);
@@ -358,10 +360,7 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                 child: Stack(
                   alignment: Alignment.topRight,
                   children: [
-                    InteractiveViewer(
-                      panEnabled: true,
-                      minScale: 1.0,
-                      maxScale: 4.0,
+                    Center(
                       child: MockupImageWidget(
                         image: media['url']!,
                         mockup: mockupAsset,
@@ -451,91 +450,94 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
     }
 
     // 4. Combine with navigation controls
-    final mainSlider = Container(
-      height: containerHeight,
-      width: double.infinity,
-      color: context.colorScheme.surfaceContainerHighest,
-      child: Stack(
-        children: [
-          Positioned.fill(child: contentLayer),
-          if (isDesktop)
-            Positioned(
-              bottom: 100,
-              left: 0,
-              right: 0,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  mediaList.length,
-                  (index) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: state.currentMediaIndex == index ? 24 : 8,
-                    height: 8,
+    final mainSlider = ClipRRect(
+      borderRadius: BorderRadius.circular(isDesktop ? 12.0 : 0.0),
+      child: Container(
+        height: containerHeight,
+        width: double.infinity,
+        color: context.colorScheme.surfaceContainerHighest,
+        child: Stack(
+          children: [
+            Positioned.fill(child: contentLayer),
+            if (isDesktop)
+              Positioned(
+                bottom: 100,
+                left: 0,
+                right: 0,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    mediaList.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: state.currentMediaIndex == index ? 24 : 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: state.currentMediaIndex == index
+                            ? AppTheme.neonAccent
+                            : context.colorScheme.onSurface.withValues(
+                                alpha: 0.3,
+                              ),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            if (state.currentMediaIndex > 0)
+              Positioned(
+                left: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
                     decoration: BoxDecoration(
-                      color: state.currentMediaIndex == index
-                          ? AppTheme.neonAccent
-                          : context.colorScheme.onSurface.withValues(
-                              alpha: 0.3,
-                            ),
-                      borderRadius: BorderRadius.circular(4),
+                      color: Colors.black.withValues(alpha: 0.3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_back_ios_new,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        _pageController.previousPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
                     ),
                   ),
                 ),
               ),
-            ),
-          if (state.currentMediaIndex > 0)
-            Positioned(
-              left: 16,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new,
-                      color: Colors.white,
+            if (state.currentMediaIndex < mediaList.length - 1)
+              Positioned(
+                right: 16,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.3),
+                      shape: BoxShape.circle,
                     ),
-                    onPressed: () {
-                      _pageController.previousPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        _pageController.nextPage(
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
-            ),
-          if (state.currentMediaIndex < mediaList.length - 1)
-            Positioned(
-              right: 16,
-              top: 0,
-              bottom: 0,
-              child: Center(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    shape: BoxShape.circle,
-                  ),
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.arrow_forward_ios,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    },
-                  ),
-                ),
-              ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
 
@@ -615,10 +617,27 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
     required bool isDesktop,
   }) {
     final isQuoteProduct = product.tag == 'QUOTE';
+    final isBackPrintOnly = product.allowedPlacements.length == 1 && product.allowedPlacements.contains('back');
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (isBackPrintOnly)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            margin: const EdgeInsets.only(bottom: 16),
+            decoration: BoxDecoration(
+              color: AppTheme.neonAccent,
+              border: Border.all(color: context.colorScheme.onSurface, width: 2),
+            ),
+            child: AppText.spaceMono(
+              'BACK PRINT ONLY',
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.pureBlack,
+              letterSpacing: 1.5,
+            ),
+          ),
         // Title and Wishlist Button
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -868,7 +887,8 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
         SizedBox(height: isDesktop ? AppSizes.p48 : AppSizes.p32),
 
         // Placement Selector
-        if (product.allowedPlacements.length > 1 && !product.allowedPlacements.contains('both')) ...[
+        if (product.allowedPlacements.length > 1 &&
+            !product.allowedPlacements.contains('both')) ...[
           AppText.spaceMono(
             'DESIGN PLACEMENT',
             fontSize: isDesktop ? 16 : 14,
@@ -887,7 +907,9 @@ class _ProductDetailsPageState extends ConsumerState<ProductDetailsPage> {
                 offset: const Offset(4, 4),
                 child: InkWell(
                   onTap: () {
-                    ref.read(productDetailsProvider.notifier).updatePlacement(placement);
+                    ref
+                        .read(productDetailsProvider.notifier)
+                        .updatePlacement(placement);
                   },
                   child: Container(
                     padding: EdgeInsets.symmetric(

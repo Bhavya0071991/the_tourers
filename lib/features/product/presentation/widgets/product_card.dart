@@ -83,7 +83,7 @@ class _ProductCardState extends ConsumerState<ProductCard> {
                       children: [
                         ClipRect(
                           child: AnimatedScale(
-                            scale: _isHovered ? 1.05 : 1.0,
+                            scale: _isHovered ? 1.02 : 1.0,
                             duration: const Duration(milliseconds: 400),
                             curve: Curves.easeOutCubic,
                             child: Container(
@@ -112,36 +112,49 @@ class _ProductCardState extends ConsumerState<ProductCard> {
 
                       // Wishlist Icon (Top Right)
                       Positioned(
-                        top: 4,
-                        right: 4,
-                        child: IconButton(
-                          padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
-                          icon: Icon(
-                            isWishlisted
-                                ? Icons.favorite
-                                : Icons.favorite_border,
-                            size: 20,
-                            color: isWishlisted
-                                ? Colors.redAccent
-                                : Theme.of(context).colorScheme.onSurface,
+                        top: 8,
+                        right: 8,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.85),
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
-                          onPressed: () {
-                            final authState = ref.read(authProvider).value;
-                            if (authState == null ||
-                                authState.status != AuthStatus.authenticated ||
-                                authState.id == null) {
-                              AppSnackBar.show(
-                                context,
-                                'SECURE ACCESS PROTOCOL REQUIRED: PLEASE LOGIN',
-                              );
-                              context.push(AppPaths.auth);
-                              return;
-                            }
-                            ref
-                                .read(wishlistProvider.notifier)
-                                .toggleWishlist(widget.product.id);
-                          },
+                          child: IconButton(
+                            padding: const EdgeInsets.all(6),
+                            constraints: const BoxConstraints(),
+                            icon: Icon(
+                              isWishlisted
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              size: 20,
+                              color: isWishlisted
+                                  ? Colors.redAccent
+                                  : Theme.of(context).colorScheme.onSurface,
+                            ),
+                            onPressed: () {
+                              final authState = ref.read(authProvider).value;
+                              if (authState == null ||
+                                  authState.status != AuthStatus.authenticated ||
+                                  authState.id == null) {
+                                AppSnackBar.show(
+                                  context,
+                                  'SECURE ACCESS PROTOCOL REQUIRED: PLEASE LOGIN',
+                                );
+                                context.push(AppPaths.auth);
+                                return;
+                              }
+                              ref
+                                  .read(wishlistProvider.notifier)
+                                  .toggleWishlist(widget.product.id);
+                            },
+                          ),
                         ),
                       ),
                     ],

@@ -77,7 +77,10 @@ class AppStrings {
   // Footer
   static const String footerWatermark = 'DESIGNED FROM HIMALAYAS';
   static const String footerWatermarkAbout = 'DESIGNED FOR THE TRAVELLERS';
-  static const String footerCopyright = '© 2026 THE TOURERS\nPrivacy Policy.';
+  static const String footerCopyright = '© 2026 THE TOURERS';
+  static const String footerPrivacyPolicy = 'Privacy Policy';
+  static const String footerTos = 'Terms of Service';
+  static const String footerRefund = 'Refund Policy';
 
   static const String footerColShops = 'SHOPS';
   static const String footerColBrand = 'BRAND';
@@ -315,4 +318,50 @@ class AppStrings {
   static const String authForgotPassword = 'FORGOT PASSWORD?';
   static const String authResetPasswordSent =
       'PASSWORD RESET LINK SENT TO EMAIL!';
+
+  // Privacy Policy Page
+  static const String privacyPolicyTitle = 'PRIVACY POLICY';
+  static const String privacyPolicyLastUpdated = 'Last Updated: ';
+  static const String privacySection1Title = '1. INFORMATION WE COLLECT';
+  static const String privacySection1Body = 'When you purchase something from our store, as part of the buying and selling process, we collect the personal information you give us such as your name, address, email address, and phone number.\n\nWhen you browse our store, we also automatically receive your computer’s internet protocol (IP) address in order to provide us with information that helps us learn about your browser and operating system.';
+  static const String privacySection2Title = '2. CONSENT';
+  static const String privacySection2Body = 'How do you get my consent?\nWhen you provide us with personal information to complete a transaction, verify your credit card, place an order, arrange for a delivery or return a purchase, we imply that you consent to our collecting it and using it for that specific reason only.\n\nIf we ask for your personal information for a secondary reason, like marketing, we will either ask you directly for your expressed consent, or provide you with an opportunity to say no.';
+  static const String privacySection3Title = '3. DISCLOSURE';
+  static const String privacySection3Body = 'We may disclose your personal information if we are required by law to do so or if you violate our Terms of Service.';
+  static const String privacySection4Title = '4. THIRD-PARTY SERVICES';
+  static const String privacySection4Body = 'In general, the third-party providers used by us will only collect, use and disclose your information to the extent necessary to allow them to perform the services they provide to us (e.g. payment gateways, shipping partners).\n\nHowever, certain third-party service providers, such as payment gateways and other payment transaction processors, have their own privacy policies in respect to the information we are required to provide to them for your purchase-related transactions.';
+  static const String privacySection5Title = '5. SECURITY';
+  static const String privacySection5Body = 'To protect your personal information, we take reasonable precautions and follow industry best practices to make sure it is not inappropriately lost, misused, accessed, disclosed, altered or destroyed.';
+  static const String privacySection6Title = '6. COOKIES';
+  static const String privacySection6Body = 'We use cookies to maintain session of your user. It is not used to personally identify you on other websites.';
+  static const String privacySection7Title = '7. CHANGES TO THIS PRIVACY POLICY';
+  static const String privacySection7Body = 'We reserve the right to modify this privacy policy at any time, so please review it frequently. Changes and clarifications will take effect immediately upon their posting on the website.';
+  static const String privacySection8Title = '8. QUESTIONS AND CONTACT INFORMATION';
+  static const String privacySection8Body = 'If you would like to: access, correct, amend or delete any personal information we have about you, register a complaint, or simply want more information, contact our Privacy Compliance Officer at support@thetourers.in.';
+
+  // Terms of Service Page
+  static const String tosTitle = 'TERMS OF SERVICE';
+  static const String tosLastUpdated = 'Last Updated: ';
+  static const String tosSection1Title = '1. OVERVIEW';
+  static const String tosSection1Body = 'This website is operated by THE TOURERS. Throughout the site, the terms "we", "us" and "our" refer to THE TOURERS. By visiting our site and/ or purchasing something from us, you engage in our "Service" and agree to be bound by the following terms and conditions.';
+  static const String tosSection2Title = '2. MADE-TO-ORDER PRODUCTS';
+  static const String tosSection2Body = 'To ensure the highest quality and exclusivity, all our products are custom-made specifically for you upon order. As such, product creation begins only after an order is successfully placed. We reserve the right to modify or discontinue any product without notice.';
+  static const String tosSection3Title = '3. ACCURACY OF BILLING AND ACCOUNT INFORMATION';
+  static const String tosSection3Body = 'You agree to provide current, complete, and accurate purchase and account information for all purchases made at our store. We are not responsible for packages that are lost or returned to sender due to incorrect shipping addresses provided by the user.';
+  static const String tosSection4Title = '4. THIRD-PARTY LINKS & TOOLS';
+  static const String tosSection4Body = 'We may provide you with access to third-party tools (like payment gateways) which we neither monitor nor have any control over. We shall have no liability whatsoever arising from or relating to your use of optional third-party tools.';
+  static const String tosSection5Title = '5. GOVERNING LAW';
+  static const String tosSection5Body = 'These Terms of Service and any separate agreements whereby we provide you Services shall be governed by and construed in accordance with the laws of India.';
+
+  // Refund Policy Page
+  static const String refundTitle = 'REFUND & CANCELLATION POLICY';
+  static const String refundLastUpdated = 'Last Updated: ';
+  static const String refundSection1Title = '1. NO REFUNDS OR EXCHANGES';
+  static const String refundSection1Body = 'Because our apparel and products are exclusively custom-made for you when you place an order, we DO NOT offer general refunds, returns, or exchanges for sizing issues, buyer\'s remorse, or preference. Please review our sizing charts carefully before purchasing. All sales are final.';
+  static const String refundSection2Title = '2. DAMAGED OR DEFECTIVE ITEMS';
+  static const String refundSection2Body = 'The only exception to our no-refund policy is if you receive a damaged or defective item. In such cases, you must contact us within 7 days of delivery. You must provide clear photographic/video evidence (including an unboxing video) of the defect and the original packaging to support@thetourers.in. Upon verification, we will issue a free replacement or a full refund at our discretion.';
+  static const String refundSection3Title = '3. CANCELLATIONS';
+  static const String refundSection3Body = 'Since the manufacturing process begins shortly after an order is placed, cancellations are only accepted within 12 hours of placing the order. Once an order has moved to production, it cannot be canceled.';
+  static const String refundSection4Title = '4. RETURN TO SENDER (RTO) / LOST PACKAGES';
+  static const String refundSection4Body = 'We are not responsible for orders that are undelivered or returned due to an incorrect/incomplete address provided by the customer. If a package is returned to our fulfillment facility, re-shipping the item will incur an additional shipping fee paid by the customer.';
 }

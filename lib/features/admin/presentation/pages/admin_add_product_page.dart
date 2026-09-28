@@ -52,7 +52,9 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
       // Defer reading provider until after init
       Future.microtask(() async {
         try {
-          final product = await ref.read(productByIdProvider(widget.productId!).future);
+          final product = await ref.read(
+            productByIdProvider(widget.productId!).future,
+          );
           if (product != null) {
             if (!mounted) return;
             setState(() {
@@ -64,10 +66,11 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
               _tagController.text = product.tag ?? '';
               _selectedGender = product.gender;
               _selectedCategory = product.category;
-              
+
               if (product.allowedPlacements.contains('both')) {
                 _placementType = 'both';
-              } else if (product.allowedPlacements.contains('front') && product.allowedPlacements.contains('back')) {
+              } else if (product.allowedPlacements.contains('front') &&
+                  product.allowedPlacements.contains('back')) {
                 _placementType = 'front_back';
               } else if (product.allowedPlacements.contains('back')) {
                 _placementType = 'back';
@@ -82,24 +85,58 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                   final backDesignUrl = product.backColorDesignImages[color];
                   _colorVariants.add(
                     _ColorVariantData(
-                      color, 
+                      color,
                       urls.map((url) => _ImageData(url: url)).toList(),
-                      backImages: backUrls.map((url) => _ImageData(url: url)).toList(),
-                      designImage: designUrl != null ? _ImageData(url: designUrl) : null,
-                      backDesignImage: backDesignUrl != null ? _ImageData(url: backDesignUrl) : null,
-                    )
+                      backImages: backUrls
+                          .map((url) => _ImageData(url: url))
+                          .toList(),
+                      designImage: designUrl != null
+                          ? _ImageData(url: designUrl)
+                          : null,
+                      backDesignImage: backDesignUrl != null
+                          ? _ImageData(url: backDesignUrl)
+                          : null,
+                    ),
                   );
                 });
               } else if (product.images.isNotEmpty) {
                 final designUrl = product.colorDesignImages['Black'];
                 final backUrls = product.backColorImages['Black'] ?? [];
                 final backDesignUrl = product.backColorDesignImages['Black'];
-                _colorVariants.add(_ColorVariantData('Black', product.images.map((url) => _ImageData(url: url)).toList(), backImages: backUrls.map((url) => _ImageData(url: url)).toList(), designImage: designUrl != null ? _ImageData(url: designUrl) : null, backDesignImage: backDesignUrl != null ? _ImageData(url: backDesignUrl) : null,));
+                _colorVariants.add(
+                  _ColorVariantData(
+                    'Black',
+                    product.images.map((url) => _ImageData(url: url)).toList(),
+                    backImages: backUrls
+                        .map((url) => _ImageData(url: url))
+                        .toList(),
+                    designImage: designUrl != null
+                        ? _ImageData(url: designUrl)
+                        : null,
+                    backDesignImage: backDesignUrl != null
+                        ? _ImageData(url: backDesignUrl)
+                        : null,
+                  ),
+                );
               } else if (product.image != null) {
                 final designUrl = product.colorDesignImages['Black'];
                 final backUrls = product.backColorImages['Black'] ?? [];
                 final backDesignUrl = product.backColorDesignImages['Black'];
-                _colorVariants.add(_ColorVariantData('Black', [_ImageData(url: product.image!)], backImages: backUrls.map((url) => _ImageData(url: url)).toList(), designImage: designUrl != null ? _ImageData(url: designUrl) : null, backDesignImage: backDesignUrl != null ? _ImageData(url: backDesignUrl) : null,));
+                _colorVariants.add(
+                  _ColorVariantData(
+                    'Black',
+                    [_ImageData(url: product.image!)],
+                    backImages: backUrls
+                        .map((url) => _ImageData(url: url))
+                        .toList(),
+                    designImage: designUrl != null
+                        ? _ImageData(url: designUrl)
+                        : null,
+                    backDesignImage: backDesignUrl != null
+                        ? _ImageData(url: backDesignUrl)
+                        : null,
+                  ),
+                );
               }
             });
           }
@@ -128,7 +165,9 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
       );
 
       if (selectedImages.isNotEmpty) {
-        final currentList = isBack ? _colorVariants[variantIndex].backImages : _colorVariants[variantIndex].images;
+        final currentList = isBack
+            ? _colorVariants[variantIndex].backImages
+            : _colorVariants[variantIndex].images;
         if (currentList.length + selectedImages.length > 10) {
           if (!context.mounted) return;
           AppSnackBar.show(context, 'You can only upload up to 10 images.');
@@ -219,10 +258,23 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
       }
     });
   }
-  
+
   void _addColorVariant() {
     setState(() {
-      _colorVariants.add(_ColorVariantData('Color ${_colorVariants.length + 1}', []));
+      final availableColors = [
+        'Black',
+        'White',
+        'Grey',
+        'Navy',
+        'Red',
+        'Green',
+      ];
+      final usedColors = _colorVariants.map((v) => v.name).toSet();
+      final defaultColor = availableColors.firstWhere(
+        (c) => !usedColors.contains(c),
+        orElse: () => 'Color ${_colorVariants.length + 1}',
+      );
+      _colorVariants.add(_ColorVariantData(defaultColor, []));
     });
   }
 
@@ -249,26 +301,56 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
         return;
       }
 
-      final bool requiresFront = _placementType == 'front' || _placementType == 'front_back' || _placementType == 'both';
-      final bool requiresBack = _placementType == 'back' || _placementType == 'front_back' || _placementType == 'both';
+      final bool requiresFront =
+          _placementType == 'front' ||
+          _placementType == 'front_back' ||
+          _placementType == 'both';
+      final bool requiresBack =
+          _placementType == 'back' ||
+          _placementType == 'front_back' ||
+          _placementType == 'both';
 
-      if (!requiresFront && _colorVariants.any((v) => v.images.isNotEmpty || v.designImage != null)) {
-        AppSnackBar.show(context, 'Front print is not allowed, but you have uploaded front images. Please remove them.');
+      if (!requiresFront &&
+          _colorVariants.any(
+            (v) => v.images.isNotEmpty || v.designImage != null,
+          )) {
+        AppSnackBar.show(
+          context,
+          'Front print is not allowed, but you have uploaded front images. Please remove them.',
+        );
         return;
       }
 
-      if (!requiresBack && _colorVariants.any((v) => v.backImages.isNotEmpty || v.backDesignImage != null)) {
-        AppSnackBar.show(context, 'Back print is not allowed, but you have uploaded back images. Please remove them.');
+      if (!requiresBack &&
+          _colorVariants.any(
+            (v) => v.backImages.isNotEmpty || v.backDesignImage != null,
+          )) {
+        AppSnackBar.show(
+          context,
+          'Back print is not allowed, but you have uploaded back images. Please remove them.',
+        );
         return;
       }
 
-      if (requiresFront && _colorVariants.any((v) => v.images.length < 2 || v.designImage == null)) {
-        AppSnackBar.show(context, 'For Front Print, each variant must have at least 2 gallery images and 1 transparent design image.');
+      if (requiresFront &&
+          _colorVariants.any(
+            (v) => v.images.length < 2 || v.designImage == null,
+          )) {
+        AppSnackBar.show(
+          context,
+          'For Front Print, each variant must have at least 2 gallery images and 1 transparent design image.',
+        );
         return;
       }
 
-      if (requiresBack && _colorVariants.any((v) => v.backImages.isEmpty || v.backDesignImage == null)) {
-        AppSnackBar.show(context, 'For Back Print, each variant must have at least 1 back mockup image and 1 transparent back design image.');
+      if (requiresBack &&
+          _colorVariants.any(
+            (v) => v.backImages.isEmpty || v.backDesignImage == null,
+          )) {
+        AppSnackBar.show(
+          context,
+          'For Back Print, each variant must have at least 1 back mockup image and 1 transparent back design image.',
+        );
         return;
       }
 
@@ -281,7 +363,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
         Map<String, List<String>> uploadedBackColorImages = {};
         Map<String, String> uploadedColorDesignImages = {};
         Map<String, String> uploadedBackColorDesignImages = {};
-        
+
         for (var variant in _colorVariants) {
           List<String> variantUrls = [];
           for (var img in variant.images) {
@@ -317,31 +399,49 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
 
           if (variant.designImage != null) {
             if (variant.designImage!.isNetwork) {
-              uploadedColorDesignImages[variant.name] = variant.designImage!.url!;
+              uploadedColorDesignImages[variant.name] =
+                  variant.designImage!.url!;
             } else if (variant.designImage!.bytes != null) {
               final ext = variant.designImage!.extension ?? 'png';
               final fileName = 'designs/${const Uuid().v4()}.$ext';
               final publicUrl = await ref
                   .read(storageRepositoryProvider)
-                  .uploadBinary('qikink-designs', fileName, variant.designImage!.bytes!);
+                  .uploadBinary(
+                    'qikink-designs',
+                    fileName,
+                    variant.designImage!.bytes!,
+                  );
               uploadedColorDesignImages[variant.name] = publicUrl;
             }
           }
 
           if (variant.backDesignImage != null) {
             if (variant.backDesignImage!.isNetwork) {
-              uploadedBackColorDesignImages[variant.name] = variant.backDesignImage!.url!;
+              uploadedBackColorDesignImages[variant.name] =
+                  variant.backDesignImage!.url!;
             } else if (variant.backDesignImage!.bytes != null) {
               final ext = variant.backDesignImage!.extension ?? 'png';
               final fileName = 'designs/${const Uuid().v4()}.$ext';
               final publicUrl = await ref
                   .read(storageRepositoryProvider)
-                  .uploadBinary('qikink-designs', fileName, variant.backDesignImage!.bytes!);
+                  .uploadBinary(
+                    'qikink-designs',
+                    fileName,
+                    variant.backDesignImage!.bytes!,
+                  );
               uploadedBackColorDesignImages[variant.name] = publicUrl;
             }
           }
         }
-        List<String> uploadedUrls = uploadedColorImages.values.first; // Fallback for 'images'
+        List<String> uploadedUrls =
+            uploadedColorImages.values.first; // Fallback for 'images'
+        if (uploadedUrls.isEmpty && uploadedBackColorImages.isNotEmpty) {
+          uploadedUrls = uploadedBackColorImages.values.first;
+        }
+
+        final String primaryImage = uploadedUrls.isNotEmpty
+            ? uploadedUrls.first
+            : '';
 
         final product = Product(
           id: isEditing ? widget.productId! : '',
@@ -351,7 +451,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
               ? '₹${_originalPriceController.text.trim()}'
               : null,
           description: _descriptionController.text.trim(),
-          image: uploadedUrls.first,
+          image: primaryImage,
           images: uploadedUrls,
           colorImages: uploadedColorImages,
           colorDesignImages: uploadedColorDesignImages,
@@ -359,20 +459,24 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
           tag: _tagController.text.trim(),
           gender: _selectedGender,
           category: _selectedCategory,
-          allowedPlacements: _placementType == 'both' 
-              ? ['both'] 
-              : _placementType == 'front_back' 
-                  ? ['front', 'back'] 
-                  : [_placementType],
+          allowedPlacements: _placementType == 'both'
+              ? ['both']
+              : _placementType == 'front_back'
+              ? ['front', 'back']
+              : [_placementType],
           backColorImages: uploadedBackColorImages,
         );
 
         if (isEditing) {
-          await ref.read(productOperationsProvider.notifier).updateProduct(product);
+          await ref
+              .read(productOperationsProvider.notifier)
+              .updateProduct(product);
           if (!context.mounted) return;
           AppSnackBar.show(context, 'Product updated successfully!');
         } else {
-          await ref.read(productOperationsProvider.notifier).addProduct(product);
+          await ref
+              .read(productOperationsProvider.notifier)
+              .addProduct(product);
           if (!context.mounted) return;
           AppSnackBar.show(context, 'Product added successfully!');
         }
@@ -399,7 +503,9 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
     });
 
     try {
-      await ref.read(productOperationsProvider.notifier).deleteProduct(widget.productId!);
+      await ref
+          .read(productOperationsProvider.notifier)
+          .deleteProduct(widget.productId!);
       if (!context.mounted) return;
       AppSnackBar.show(context, 'Product deleted successfully!');
       if (context.mounted) context.go(AppPaths.adminProducts);
@@ -578,7 +684,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                       style: TextStyle(fontFamily: 'SpaceMono'),
                                     ),
                                   ),
-                                  ],
+                                ],
                                 onChanged: (val) {
                                   if (val != null) {
                                     setState(() => _selectedCategory = val);
@@ -612,7 +718,7 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                   ],
                 ),
                 const SizedBox(height: 24),
-                
+
                 Row(
                   children: [
                     Expanded(
@@ -697,15 +803,20 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                         ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: textColor,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
+                          ),
+                          shape: const RoundedRectangleBorder(
+                            borderRadius: BorderRadius.zero,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 ...List.generate(_colorVariants.length, (variantIndex) {
                   final variant = _colorVariants[variantIndex];
                   return Container(
@@ -724,15 +835,39 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                             Expanded(
                               child: DropdownButtonHideUnderline(
                                 child: DropdownButton<String>(
-                                  value: ['Black', 'White', 'Grey', 'Navy', 'Red', 'Green'].contains(variant.name) ? variant.name : 'Black',
+                                  value:
+                                      [
+                                        'Black',
+                                        'White',
+                                        'Grey',
+                                        'Navy',
+                                        'Red',
+                                        'Green',
+                                      ].contains(variant.name)
+                                      ? variant.name
+                                      : 'Black',
                                   isExpanded: true,
-                                  icon: Icon(Icons.arrow_drop_down, color: textColor),
-                                  items: ['Black', 'White', 'Grey', 'Navy', 'Red', 'Green'].map((colorName) {
-                                    return DropdownMenuItem(
-                                      value: colorName,
-                                      child: AppText.spaceMono(colorName, color: textColor),
-                                    );
-                                  }).toList(),
+                                  icon: Icon(
+                                    Icons.arrow_drop_down,
+                                    color: textColor,
+                                  ),
+                                  items:
+                                      [
+                                        'Black',
+                                        'White',
+                                        'Grey',
+                                        'Navy',
+                                        'Red',
+                                        'Green',
+                                      ].map((colorName) {
+                                        return DropdownMenuItem(
+                                          value: colorName,
+                                          child: AppText.spaceMono(
+                                            colorName,
+                                            color: textColor,
+                                          ),
+                                        );
+                                      }).toList(),
                                   onChanged: (val) {
                                     if (val != null) {
                                       setState(() => variant.name = val);
@@ -743,7 +878,8 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                             ),
                             IconButton(
                               icon: const Icon(Icons.delete, color: Colors.red),
-                              onPressed: () => _removeColorVariant(variantIndex),
+                              onPressed: () =>
+                                  _removeColorVariant(variantIndex),
                             ),
                           ],
                         ),
@@ -751,12 +887,24 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            AppText.spaceMono('Images (${variant.images.length}/10)', fontSize: 12, color: textColor),
+                            AppText.spaceMono(
+                              'Images (${variant.images.length}/10)',
+                              fontSize: 12,
+                              color: textColor,
+                            ),
                             TextButton.icon(
                               onPressed: () => _pickImages(variantIndex),
-                              icon: Icon(Icons.upload, size: 16, color: textColor),
-                              label: AppText.spaceMono('UPLOAD', fontSize: 12, color: textColor),
-                            )
+                              icon: Icon(
+                                Icons.upload,
+                                size: 16,
+                                color: textColor,
+                              ),
+                              label: AppText.spaceMono(
+                                'UPLOAD',
+                                fontSize: 12,
+                                color: textColor,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -764,7 +912,8 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                           GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 5,
                                   crossAxisSpacing: 8,
                                   mainAxisSpacing: 8,
@@ -777,21 +926,35 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: textColor, width: 2),
+                                      border: Border.all(
+                                        color: textColor,
+                                        width: 2,
+                                      ),
                                     ),
                                     child: img.isNetwork
-                                        ? AppImage(imageUrl: img.url!, fit: BoxFit.cover)
-                                        : Image.memory(img.bytes!, fit: BoxFit.cover),
+                                        ? AppImage(
+                                            imageUrl: img.url!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.memory(
+                                            img.bytes!,
+                                            fit: BoxFit.cover,
+                                          ),
                                   ),
                                   Positioned(
                                     top: 2,
                                     right: 2,
                                     child: InkWell(
-                                      onTap: () => _removeImage(variantIndex, imgIndex),
+                                      onTap: () =>
+                                          _removeImage(variantIndex, imgIndex),
                                       child: Container(
                                         color: textColor,
                                         padding: const EdgeInsets.all(2),
-                                        child: Icon(Icons.close, color: surfaceColor, size: 12),
+                                        child: Icon(
+                                          Icons.close,
+                                          color: surfaceColor,
+                                          size: 12,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -803,12 +966,25 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            AppText.spaceMono('Back Mockup Images (${variant.backImages.length}/10)', fontSize: 12, color: textColor),
+                            AppText.spaceMono(
+                              'Back Mockup Images (${variant.backImages.length}/10)',
+                              fontSize: 12,
+                              color: textColor,
+                            ),
                             TextButton.icon(
-                              onPressed: () => _pickImages(variantIndex, isBack: true),
-                              icon: Icon(Icons.upload, size: 16, color: textColor),
-                              label: AppText.spaceMono('UPLOAD BACK', fontSize: 12, color: textColor),
-                            )
+                              onPressed: () =>
+                                  _pickImages(variantIndex, isBack: true),
+                              icon: Icon(
+                                Icons.upload,
+                                size: 16,
+                                color: textColor,
+                              ),
+                              label: AppText.spaceMono(
+                                'UPLOAD BACK',
+                                fontSize: 12,
+                                color: textColor,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 16),
@@ -816,7 +992,8 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                           GridView.builder(
                             shrinkWrap: true,
                             physics: const NeverScrollableScrollPhysics(),
-                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
                                   crossAxisCount: 5,
                                   crossAxisSpacing: 8,
                                   mainAxisSpacing: 8,
@@ -829,21 +1006,38 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                 children: [
                                   Container(
                                     decoration: BoxDecoration(
-                                      border: Border.all(color: textColor, width: 2),
+                                      border: Border.all(
+                                        color: textColor,
+                                        width: 2,
+                                      ),
                                     ),
                                     child: img.isNetwork
-                                        ? AppImage(imageUrl: img.url!, fit: BoxFit.cover)
-                                        : Image.memory(img.bytes!, fit: BoxFit.cover),
+                                        ? AppImage(
+                                            imageUrl: img.url!,
+                                            fit: BoxFit.cover,
+                                          )
+                                        : Image.memory(
+                                            img.bytes!,
+                                            fit: BoxFit.cover,
+                                          ),
                                   ),
                                   Positioned(
                                     top: 2,
                                     right: 2,
                                     child: InkWell(
-                                      onTap: () => _removeImage(variantIndex, imgIndex, isBack: true),
+                                      onTap: () => _removeImage(
+                                        variantIndex,
+                                        imgIndex,
+                                        isBack: true,
+                                      ),
                                       child: Container(
                                         color: textColor,
                                         padding: const EdgeInsets.all(2),
-                                        child: Icon(Icons.close, color: surfaceColor, size: 12),
+                                        child: Icon(
+                                          Icons.close,
+                                          color: surfaceColor,
+                                          size: 12,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -855,12 +1049,24 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            AppText.spaceMono('Transparent Design PNG', fontSize: 12, color: textColor),
+                            AppText.spaceMono(
+                              'Transparent Design PNG',
+                              fontSize: 12,
+                              color: textColor,
+                            ),
                             TextButton.icon(
                               onPressed: () => _pickDesignImage(variantIndex),
-                              icon: Icon(Icons.upload, size: 16, color: textColor),
-                              label: AppText.spaceMono('UPLOAD', fontSize: 12, color: textColor),
-                            )
+                              icon: Icon(
+                                Icons.upload,
+                                size: 16,
+                                color: textColor,
+                              ),
+                              label: AppText.spaceMono(
+                                'UPLOAD',
+                                fontSize: 12,
+                                color: textColor,
+                              ),
+                            ),
                           ],
                         ),
                         if (variant.designImage != null) ...[
@@ -871,12 +1077,23 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                 height: 120,
                                 width: 120,
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: textColor, width: 2),
-                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                  border: Border.all(
+                                    color: textColor,
+                                    width: 2,
+                                  ),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
                                 ),
                                 child: variant.designImage!.isNetwork
-                                    ? AppImage(imageUrl: variant.designImage!.url!, fit: BoxFit.contain)
-                                    : Image.memory(variant.designImage!.bytes!, fit: BoxFit.contain),
+                                    ? AppImage(
+                                        imageUrl: variant.designImage!.url!,
+                                        fit: BoxFit.contain,
+                                      )
+                                    : Image.memory(
+                                        variant.designImage!.bytes!,
+                                        fit: BoxFit.contain,
+                                      ),
                               ),
                               Positioned(
                                 top: 2,
@@ -886,7 +1103,11 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                   child: Container(
                                     color: textColor,
                                     padding: const EdgeInsets.all(2),
-                                    child: Icon(Icons.close, color: surfaceColor, size: 12),
+                                    child: Icon(
+                                      Icons.close,
+                                      color: surfaceColor,
+                                      size: 12,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -897,12 +1118,25 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            AppText.spaceMono('Back Transparent Design PNG', fontSize: 12, color: textColor),
+                            AppText.spaceMono(
+                              'Back Transparent Design PNG',
+                              fontSize: 12,
+                              color: textColor,
+                            ),
                             TextButton.icon(
-                              onPressed: () => _pickDesignImage(variantIndex, isBack: true),
-                              icon: Icon(Icons.upload, size: 16, color: textColor),
-                              label: AppText.spaceMono('UPLOAD BACK', fontSize: 12, color: textColor),
-                            )
+                              onPressed: () =>
+                                  _pickDesignImage(variantIndex, isBack: true),
+                              icon: Icon(
+                                Icons.upload,
+                                size: 16,
+                                color: textColor,
+                              ),
+                              label: AppText.spaceMono(
+                                'UPLOAD BACK',
+                                fontSize: 12,
+                                color: textColor,
+                              ),
+                            ),
                           ],
                         ),
                         if (variant.backDesignImage != null) ...[
@@ -913,22 +1147,40 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                                 height: 120,
                                 width: 120,
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: textColor, width: 2),
-                                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                  border: Border.all(
+                                    color: textColor,
+                                    width: 2,
+                                  ),
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainerHighest,
                                 ),
                                 child: variant.backDesignImage!.isNetwork
-                                    ? AppImage(imageUrl: variant.backDesignImage!.url!, fit: BoxFit.contain)
-                                    : Image.memory(variant.backDesignImage!.bytes!, fit: BoxFit.contain),
+                                    ? AppImage(
+                                        imageUrl: variant.backDesignImage!.url!,
+                                        fit: BoxFit.contain,
+                                      )
+                                    : Image.memory(
+                                        variant.backDesignImage!.bytes!,
+                                        fit: BoxFit.contain,
+                                      ),
                               ),
                               Positioned(
                                 top: 2,
                                 right: 2,
                                 child: InkWell(
-                                  onTap: () => _removeDesignImage(variantIndex, isBack: true),
+                                  onTap: () => _removeDesignImage(
+                                    variantIndex,
+                                    isBack: true,
+                                  ),
                                   child: Container(
                                     color: textColor,
                                     padding: const EdgeInsets.all(2),
-                                    child: Icon(Icons.close, color: surfaceColor, size: 12),
+                                    child: Icon(
+                                      Icons.close,
+                                      color: surfaceColor,
+                                      size: 12,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -958,7 +1210,9 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                         shadowColor: textColor.withValues(alpha: 0.2),
                         offset: const Offset(4, 4),
                         child: ElevatedButton(
-                          onPressed: (_isSubmitting || _isDeleting) ? null : _submit,
+                          onPressed: (_isSubmitting || _isDeleting)
+                              ? null
+                              : _submit,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: textColor,
                             foregroundColor: surfaceColor,
@@ -992,7 +1246,9 @@ class _AdminAddProductPageState extends ConsumerState<AdminAddProductPage> {
                           shadowColor: Colors.red.withValues(alpha: 0.2),
                           offset: const Offset(4, 4),
                           child: ElevatedButton(
-                            onPressed: (_isSubmitting || _isDeleting) ? null : _deleteProduct,
+                            onPressed: (_isSubmitting || _isDeleting)
+                                ? null
+                                : _deleteProduct,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.red,
                               foregroundColor: Colors.white,
@@ -1097,7 +1353,13 @@ class _ColorVariantData {
   List<_ImageData> backImages;
   _ImageData? designImage;
   _ImageData? backDesignImage;
-  _ColorVariantData(this.name, this.images, {this.backImages = const [], this.designImage, this.backDesignImage});
+  _ColorVariantData(
+    this.name,
+    this.images, {
+    List<_ImageData>? backImages,
+    this.designImage,
+    this.backDesignImage,
+  }) : backImages = backImages ?? [];
 }
 
 class _ImageData {

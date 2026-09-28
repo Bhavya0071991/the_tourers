@@ -7,6 +7,9 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../features/product/presentation/pages/product_details_page.dart';
 import '../../features/product/presentation/pages/category_page.dart';
 import '../../features/home/presentation/pages/about_page.dart';
+import '../../features/home/presentation/pages/privacy_policy_page.dart';
+import '../../features/home/presentation/pages/terms_of_service_page.dart';
+import '../../features/home/presentation/pages/refund_policy_page.dart';
 import '../../features/home/presentation/pages/ai_generator_page.dart';
 import '../../features/portraits/presentation/pages/portrait_prints_page.dart';
 import '../../features/portraits/presentation/pages/portrait_details_page.dart';
@@ -47,6 +50,9 @@ enum AppRoute {
   portraits,
   portraitDetails,
   about,
+  privacyPolicy,
+  tos,
+  refundPolicy,
   generator,
   cart,
   auth,
@@ -240,6 +246,33 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           context: context,
           state: state,
           child: const AboutUsPage(),
+        ),
+      ),
+      GoRoute(
+        path: AppPaths.privacyPolicy,
+        name: AppRoute.privacyPolicy.name,
+        pageBuilder: (context, state) => _buildPageWithDefaultTransition(
+          context: context,
+          state: state,
+          child: const PrivacyPolicyPage(),
+        ),
+      ),
+      GoRoute(
+        path: AppPaths.tos,
+        name: AppRoute.tos.name,
+        pageBuilder: (context, state) => _buildPageWithDefaultTransition(
+          context: context,
+          state: state,
+          child: const TermsOfServicePage(),
+        ),
+      ),
+      GoRoute(
+        path: AppPaths.refundPolicy,
+        name: AppRoute.refundPolicy.name,
+        pageBuilder: (context, state) => _buildPageWithDefaultTransition(
+          context: context,
+          state: state,
+          child: const RefundPolicyPage(),
         ),
       ),
       GoRoute(

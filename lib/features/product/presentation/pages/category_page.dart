@@ -222,7 +222,9 @@ class CategoryPage extends ConsumerWidget {
                             ),
                             orElse: () => const SizedBox.shrink(),
                           ),
-                          SizedBox(height: isDesktop ? AppSizes.p32 : AppSizes.p8),
+                          SizedBox(
+                            height: isDesktop ? AppSizes.p32 : AppSizes.p8,
+                          ),
                         ],
                       ),
                     ),
@@ -315,15 +317,27 @@ class CategoryPage extends ConsumerWidget {
                         );
                       }
 
+                      double horizontalPadding = isDesktop ? 64.0 : 24.0;
+                      if (screenWidth <= 550) {
+                        horizontalPadding = 8.0;
+                      }
+                      if (screenWidth > AppSizes.maxWebWidth) {
+                        horizontalPadding =
+                            ((screenWidth - AppSizes.maxWebWidth) / 2) +
+                            (isDesktop ? 64.0 : 24.0);
+                      }
+
                       return SliverPadding(
                         padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth <= 550 ? 8.0 : (isDesktop ? 64.0 : 24.0),
+                          horizontal: horizontalPadding,
                         ),
                         sliver: SliverGrid(
                           gridDelegate:
                               SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: crossAxisCount,
-                                childAspectRatio: screenWidth <= 550 ? 0.70 : 0.78,
+                                childAspectRatio: screenWidth <= 550
+                                    ? 0.70
+                                    : 0.78,
                                 crossAxisSpacing: screenWidth <= 550 ? 12 : 20,
                                 mainAxisSpacing: screenWidth <= 550 ? 16 : 28,
                               ),

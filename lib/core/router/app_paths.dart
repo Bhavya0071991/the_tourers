@@ -3,6 +3,9 @@ class AppPaths {
   static const String category = '/category';
   static const String product = '/product';
   static const String about = '/about';
+  static const String privacyPolicy = '/privacy-policy';
+  static const String tos = '/terms-of-service';
+  static const String refundPolicy = '/refund-policy';
   static const String generator = '/generator';
   static const String cart = '/cart';
   static const String adminLogin = '/admin-login';

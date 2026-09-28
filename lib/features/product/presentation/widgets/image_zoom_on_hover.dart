@@ -7,7 +7,7 @@ class ImageZoomOnHover extends StatefulWidget {
   const ImageZoomOnHover({
     super.key,
     required this.child,
-    this.zoomScale = 1.5, // Decreased default zoom scale
+    this.zoomScale = 1.2, // Decreased default zoom scale
   });
 
   @override

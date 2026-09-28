@@ -272,7 +272,39 @@ class _FooterSectionState extends State<FooterSection>
           color: fadedTextColor,
           fontSize: isDesktop ? 12 : 10,
           height: 1.8,
-          decoration: TextDecoration.underline,
+        ),
+        const SizedBox(height: 4),
+        InkWell(
+          onTap: () => context.go(AppPaths.privacyPolicy),
+          child: AppText.spaceMono(
+            AppStrings.footerPrivacyPolicy,
+            color: fadedTextColor,
+            fontSize: isDesktop ? 12 : 10,
+            height: 1.8,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+        const SizedBox(height: 4),
+        InkWell(
+          onTap: () => context.go(AppPaths.tos),
+          child: AppText.spaceMono(
+            AppStrings.footerTos,
+            color: fadedTextColor,
+            fontSize: isDesktop ? 12 : 10,
+            height: 1.8,
+            decoration: TextDecoration.underline,
+          ),
+        ),
+        const SizedBox(height: 4),
+        InkWell(
+          onTap: () => context.go(AppPaths.refundPolicy),
+          child: AppText.spaceMono(
+            AppStrings.footerRefund,
+            color: fadedTextColor,
+            fontSize: isDesktop ? 12 : 10,
+            height: 1.8,
+            decoration: TextDecoration.underline,
+          ),
         ),
       ],
     );
