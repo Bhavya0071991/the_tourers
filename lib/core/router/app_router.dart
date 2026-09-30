@@ -374,11 +374,15 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppPaths.orders,
         name: AppRoute.orders.name,
-        pageBuilder: (context, state) => _buildPageWithDefaultTransition(
-          context: context,
-          state: state,
-          child: const MyOrdersPage(),
-        ),
+        pageBuilder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          final initialIndex = extra?['initialIndex'] as int? ?? 0;
+          return _buildPageWithDefaultTransition(
+            context: context,
+            state: state,
+            child: MyOrdersPage(initialIndex: initialIndex),
+          );
+        },
       ),
       GoRoute(
         path: '${AppPaths.orders}/:id',

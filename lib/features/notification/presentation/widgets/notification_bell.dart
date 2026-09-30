@@ -222,7 +222,14 @@ class _NotificationPanel extends ConsumerWidget {
                           if (isAdmin) {
                             context.go(AppPaths.adminOrders);
                           } else {
-                            context.go(AppPaths.orders);
+                            int tabIndex = 0; // default to ONGOING
+                            final msg = n.message.toUpperCase();
+                            if (msg.contains('DELIVERED')) {
+                              tabIndex = 1;
+                            } else if (msg.contains('CANCELLED')) {
+                              tabIndex = 2;
+                            }
+                            context.go(AppPaths.orders, extra: {'initialIndex': tabIndex});
                           }
                         },
                         child: Container(

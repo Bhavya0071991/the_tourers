@@ -10,7 +10,9 @@ import '../../models/order_model.dart';
 import '../widgets/order_card.dart';
 
 class MyOrdersPage extends ConsumerWidget {
-  const MyOrdersPage({super.key});
+  final int initialIndex;
+
+  const MyOrdersPage({super.key, this.initialIndex = 0});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -18,6 +20,7 @@ class MyOrdersPage extends ConsumerWidget {
 
     return DefaultTabController(
       length: 3,
+      initialIndex: initialIndex,
       child: Scaffold(
         body: SafeArea(
           child: Column(
