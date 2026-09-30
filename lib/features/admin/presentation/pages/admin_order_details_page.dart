@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_paths.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../../providers/admin_orders_provider.dart';
 import '../../../order/models/order_model.dart';
@@ -38,7 +39,13 @@ class AdminOrderDetailsPage extends ConsumerWidget {
                 children: [
                   BrutalistHoverWidget(
                     child: InkWell(
-                      onTap: () => context.pop(),
+                      onTap: () {
+                        if (context.canPop()) {
+                          context.pop();
+                        } else {
+                          context.go(AppPaths.adminOrders);
+                        }
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -235,6 +242,16 @@ class AdminOrderDetailsPage extends ConsumerWidget {
     );
   }
 
+  String _getPrintTypeLabel(OrderItem item) {
+    final hasFront = item.frontDesignPreview != null || item.frontPrintUrl != null;
+    final hasBack = item.backDesignPreview != null || item.backPrintUrl != null;
+    
+    if (hasFront && hasBack) return 'FRONT & BACK PRINT';
+    if (hasFront) return 'FRONT PRINT ONLY';
+    if (hasBack) return 'BACK PRINT ONLY';
+    return 'PLAIN / PRE-PRINTED';
+  }
+
   Widget _buildOrderItem(
     BuildContext context,
     OrderItem item,
@@ -297,7 +314,22 @@ class AdminOrderDetailsPage extends ConsumerWidget {
                   fontSize: 12,
                   color: textColor.withValues(alpha: 0.7),
                 ),
-
+                if (_getPrintTypeLabel(item).isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: textColor.withValues(alpha: 0.1),
+                      border: Border.all(color: textColor.withValues(alpha: 0.5)),
+                    ),
+                    child: AppText.spaceMono(
+                      _getPrintTypeLabel(item),
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: textColor,
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 8),
                 AppText.spaceMono(
                   '₹${item.unitPrice.toStringAsFixed(0)}',

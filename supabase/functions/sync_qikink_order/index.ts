@@ -62,6 +62,21 @@
         throw new Error('No shipping address found for order');
       }
 
+      // Fetch Customer Email
+      let customerEmail = "customer@example.com";
+      if (orderData.user_id) {
+        try {
+          const { data: userData, error: userError } = await supabaseClient.auth.admin.getUserById(orderData.user_id);
+          if (userData?.user?.email) {
+            customerEmail = userData.user.email;
+          } else if (userError) {
+            console.error("DEBUG: Failed to fetch user email:", userError);
+          }
+        } catch (e) {
+          console.error("DEBUG: Exception while fetching user email:", e);
+        }
+      }
+
       // 2. Generate Access Token from Qikink (SANDBOX API)
       console.log(`DEBUG: Generating Access Token from Qikink...`);
       const tokenResponse = await fetch('https://sandbox.qikink.com/api/token', {
@@ -198,9 +213,8 @@
         const actualColor = sizeParts.length > 1 ? sizeParts[1] : 'BLACK'; // e.g. "WHITE", "BLACK"
         const colorCode = actualColor.includes('WHITE') ? 'Wh' : 'Bk';
         
-        // Build dynamic SKU for "Unisex Oversized Classic T-Shirt | UC22"
-        // "UC22" (Oversized), colorCode ("Bk" or "Wh"), actualSize (S/M/L/XL)
-        const dynamicSku = `UC22-${colorCode}-${actualSize}`;
+        // Build dynamic SKU for "Unisex Oversized Classic T-Shirt"
+        const dynamicSku = `UOsMRnHs-${colorCode}-${actualSize}`;
         
         const productDesigns = [];
         if (finalFrontDesignUrl) {
@@ -209,8 +223,8 @@
             placement_sku: "fr",
             mockup_link: finalFrontMockupUrl,
             design_link: finalFrontDesignUrl,
-            width_inches: "10", 
-            height_inches: "10" 
+            width_inches: 10, 
+            height_inches: 10 
           });
         }
         if (finalBackDesignUrl) {
@@ -219,8 +233,8 @@
             placement_sku: "bk",
             mockup_link: finalBackMockupUrl,
             design_link: finalBackDesignUrl,
-            width_inches: "10",
-            height_inches: "10"
+            width_inches: 12,
+            height_inches: 17
           });
         }
         
@@ -229,7 +243,7 @@
           quantity: parseInt(item.quantity, 10) || 1,
           price: parseFloat(item.price) || 0,
           search_from_my_products: 0,
-          print_type_id: 1, // 1 = DTG
+          print_type_id: 17, // 17 = DTF
           designs: productDesigns
         });
       }
@@ -258,7 +272,7 @@
           country_code: "IN",
           zip: parseInt(address.pincode, 10) || 0,
           phone: address.phone,
-          email: "customer@example.com"
+          email: customerEmail
         }
       };
 

@@ -42,165 +42,168 @@ class AccountPage extends ConsumerWidget {
                 children: [
                   // Profile Header
                   SafeArea(
-              bottom: false,
-              child: ProfileHeader(
-                name: authState.value?.username ?? 'TOURER',
-                email: authState.value?.email ?? '',
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            // Quick stats
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              child: Row(
-                children: [
-                  _StatCard(
-                    label: 'ORDERS',
-                    value: '${orders.length}',
-                    textColor: textColor,
-                  ),
-                  const SizedBox(width: 12),
-                  _StatCard(
-                    label: 'ACTIVE',
-                    value: '$ongoingCount',
-                    textColor: textColor,
-                  ),
-                  const SizedBox(width: 12),
-                  _StatCard(
-                    label: 'WISHLIST',
-                    value: '$wishlistCount',
-                    textColor: textColor,
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Menu section
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: textColor.withValues(alpha: 0.1),
-                  width: 1.5,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-                    child: AppText.spaceMono(
-                      '/// ACCOUNT MENU',
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: textColor.withValues(alpha: 0.3),
+                    bottom: false,
+                    child: ProfileHeader(
+                      name: authState.value?.username ?? 'TOURER',
+                      email: authState.value?.email ?? '',
                     ),
                   ),
 
-                  AccountMenuTile(
-                    icon: Icons.local_shipping_outlined,
-                    title: 'My Orders',
-                    subtitle: ongoingCount > 0
-                        ? '$ongoingCount active order${ongoingCount > 1 ? "s" : ""}'
-                        : 'View order history',
-                    onTap: () => context.push(AppPaths.orders),
-                  ),
-                  AccountMenuTile(
-                    icon: Icons.location_on_outlined,
-                    title: 'Saved Addresses',
-                    subtitle: 'Manage delivery addresses',
-                    onTap: () => context.push(AppPaths.savedAddresses),
-                  ),
-                  AccountMenuTile(
-                    icon: Icons.favorite_border,
-                    title: 'Wishlist',
-                    subtitle: 'Items you love',
-                    onTap: () => context.push(AppPaths.wishlist),
-                  ),
-                  AccountMenuTile(
-                    icon: Icons.auto_awesome_outlined,
-                    title: 'Saved AI Designs',
-                    subtitle: 'Your custom creations',
-                    onTap: () => context.push(AppPaths.savedDesigns),
-                  ),
-                ],
-              ),
-            ),
+                  const SizedBox(height: 8),
 
-            const SizedBox(height: 16),
-
-            // General section
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: textColor.withValues(alpha: 0.1),
-                  width: 1.5,
-                ),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
-                    child: AppText.spaceMono(
-                      '/// GENERAL',
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: textColor.withValues(alpha: 0.3),
+                  // Quick stats
+                  Container(
+                    margin: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
+                    ),
+                    child: Row(
+                      children: [
+                        _StatCard(
+                          label: 'ORDERS',
+                          value: '${orders.length}',
+                          textColor: textColor,
+                        ),
+                        const SizedBox(width: 12),
+                        _StatCard(
+                          label: 'ACTIVE',
+                          value: '$ongoingCount',
+                          textColor: textColor,
+                        ),
+                        const SizedBox(width: 12),
+                        _StatCard(
+                          label: 'WISHLIST',
+                          value: '$wishlistCount',
+                          textColor: textColor,
+                        ),
+                      ],
                     ),
                   ),
 
-                  AccountMenuTile(
-                    icon: Icons.headset_mic_outlined,
-                    title: 'Help & Support',
-                    subtitle: 'Contact us anytime',
-                    onTap: () {},
+                  const SizedBox(height: 16),
+
+                  // Menu section
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: textColor.withValues(alpha: 0.1),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                          child: AppText.spaceMono(
+                            '/// ACCOUNT MENU',
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: textColor.withValues(alpha: 0.3),
+                          ),
+                        ),
+
+                        AccountMenuTile(
+                          icon: Icons.local_shipping_outlined,
+                          title: 'My Orders',
+                          subtitle: ongoingCount > 0
+                              ? '$ongoingCount active order${ongoingCount > 1 ? "s" : ""}'
+                              : 'View order history',
+                          onTap: () => context.push(AppPaths.orders),
+                        ),
+                        AccountMenuTile(
+                          icon: Icons.location_on_outlined,
+                          title: 'Saved Addresses',
+                          subtitle: 'Manage delivery addresses',
+                          onTap: () => context.push(AppPaths.savedAddresses),
+                        ),
+                        AccountMenuTile(
+                          icon: Icons.favorite_border,
+                          title: 'Wishlist',
+                          subtitle: 'Items you love',
+                          onTap: () => context.push(AppPaths.wishlist),
+                        ),
+                        AccountMenuTile(
+                          icon: Icons.auto_awesome_outlined,
+                          title: 'Saved AI Designs',
+                          subtitle: 'Your custom creations',
+                          onTap: () => context.push(AppPaths.savedDesigns),
+                        ),
+                      ],
+                    ),
                   ),
-                  AccountMenuTile(
-                    icon: Icons.info_outline,
-                    title: 'About The Tourers',
-                    subtitle: 'Our story',
-                    onTap: () => context.push(AppPaths.about),
+
+                  const SizedBox(height: 16),
+
+                  // General section
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 24),
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: textColor.withValues(alpha: 0.1),
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(24, 20, 24, 8),
+                          child: AppText.spaceMono(
+                            '/// GENERAL',
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: textColor.withValues(alpha: 0.3),
+                          ),
+                        ),
+
+                        AccountMenuTile(
+                          icon: Icons.headset_mic_outlined,
+                          title: 'Help & Support',
+                          subtitle: 'Contact us anytime',
+                          onTap: () {},
+                        ),
+                        AccountMenuTile(
+                          icon: Icons.info_outline,
+                          title: 'About The Tourers',
+                          subtitle: 'Our story',
+                          onTap: () => context.push(AppPaths.about),
+                        ),
+                        AccountMenuTile(
+                          icon: Icons.logout,
+                          title: 'Logout',
+                          iconColor: Colors.redAccent,
+                          showDivider: false,
+                          onTap: () => _showLogoutDialog(context, ref),
+                        ),
+                      ],
+                    ),
                   ),
-                  AccountMenuTile(
-                    icon: Icons.logout,
-                    title: 'Logout',
-                    iconColor: Colors.redAccent,
-                    showDivider: false,
-                    onTap: () => _showLogoutDialog(context, ref),
+
+                  const SizedBox(height: 32),
+
+                  // App version
+                  AppText.spaceMono(
+                    'THE TOURERS. v1.0.0',
+                    fontSize: 9,
+                    color: textColor.withValues(alpha: 0.2),
                   ),
+                  const SizedBox(height: 8),
+                  AppText.spaceMono(
+                    '/// DESIGNED FROM HIMALAYAS',
+                    fontSize: 8,
+                    color: textColor.withValues(alpha: 0.15),
+                  ),
+
+                  const SizedBox(height: 48),
                 ],
               ),
             ),
-
-            const SizedBox(height: 32),
-
-            // App version
-            AppText.spaceMono(
-              'THE TOURERS. v1.0.0',
-              fontSize: 9,
-              color: textColor.withValues(alpha: 0.2),
-            ),
-            const SizedBox(height: 8),
-            AppText.spaceMono(
-              '/// DESIGNED FOR TRAVELLERS',
-              fontSize: 8,
-              color: textColor.withValues(alpha: 0.15),
-            ),
-
-            const SizedBox(height: 48),
-          ],
-        ),
+          ),
+        ],
       ),
-    ),
-  ],
-),
-);
+    );
   }
 
   Widget _buildLoginPrompt(
@@ -220,72 +223,75 @@ class AccountPage extends ConsumerWidget {
                   padding: const EdgeInsets.all(32),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: textColor.withValues(alpha: 0.2),
-                      width: 2,
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.person_outline,
-                    size: 36,
-                    color: textColor.withValues(alpha: 0.3),
-                  ),
-                ),
-                const SizedBox(height: 32),
-                AppText.bebas(
-                  'IDENTITY REQUIRED',
-                  fontSize: 32,
-                  letterSpacing: 2,
-                  color: textColor,
-                ),
-                const SizedBox(height: 8),
-                AppText.spaceMono(
-                  'Login to access your account,\norders, and saved designs.',
-                  fontSize: 11,
-                  color: textColor.withValues(alpha: 0.4),
-                  textAlign: TextAlign.center,
-                  height: 1.6,
-                ),
-                const SizedBox(height: 32),
-                BrutalistHoverWidget(
-                  shadowColor: textColor.withValues(alpha: 0.2),
-                  offset: const Offset(5, 5),
-                  child: SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: () => context.push(AppPaths.auth),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.neonAccent,
-                        foregroundColor: AppTheme.pureBlack,
-                        padding: const EdgeInsets.symmetric(vertical: 24),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(0),
-                          side: const BorderSide(color: AppTheme.pureBlack, width: 2),
+                    children: [
+                      Container(
+                        width: 80,
+                        height: 80,
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: textColor.withValues(alpha: 0.2),
+                            width: 2,
+                          ),
+                        ),
+                        child: Icon(
+                          Icons.person_outline,
+                          size: 36,
+                          color: textColor.withValues(alpha: 0.3),
                         ),
                       ),
-                      child: AppText.bebas(
-                        'LOGIN / REGISTER ↗',
-                        fontSize: 18,
-                        letterSpacing: 1.5,
+                      const SizedBox(height: 32),
+                      AppText.bebas(
+                        'IDENTITY REQUIRED',
+                        fontSize: 32,
+                        letterSpacing: 2,
+                        color: textColor,
                       ),
-                    ),
+                      const SizedBox(height: 8),
+                      AppText.spaceMono(
+                        'Login to access your account,\norders, and saved designs.',
+                        fontSize: 11,
+                        color: textColor.withValues(alpha: 0.4),
+                        textAlign: TextAlign.center,
+                        height: 1.6,
+                      ),
+                      const SizedBox(height: 32),
+                      BrutalistHoverWidget(
+                        shadowColor: textColor.withValues(alpha: 0.2),
+                        offset: const Offset(5, 5),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () => context.push(AppPaths.auth),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.neonAccent,
+                              foregroundColor: AppTheme.pureBlack,
+                              padding: const EdgeInsets.symmetric(vertical: 24),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(0),
+                                side: const BorderSide(
+                                  color: AppTheme.pureBlack,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            child: AppText.bebas(
+                              'LOGIN / REGISTER ↗',
+                              fontSize: 18,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
-        ),
+        ],
       ),
-    ),
-  ],
-),
-);
-}
+    );
+  }
 
   void _showLogoutDialog(BuildContext context, WidgetRef ref) {
     final textColor = Theme.of(context).colorScheme.onSurface;

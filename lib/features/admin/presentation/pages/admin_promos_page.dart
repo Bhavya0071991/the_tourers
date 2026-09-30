@@ -289,7 +289,7 @@ class _AdminPromosPageState extends ConsumerState<AdminPromosPage> {
                               value: isActive,
                               onChanged: (_) =>
                                   _togglePromoStatus(promo['id'], isActive),
-                              activeColor: Colors.greenAccent,
+                              activeThumbColor: Colors.greenAccent,
                               activeTrackColor: Colors.green.withValues(
                                 alpha: 0.3,
                               ),
